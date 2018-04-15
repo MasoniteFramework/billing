@@ -14,7 +14,12 @@ class Billable:
         """
         Subscribe user to a billing plan
         """
-        return PROCESSOR.subscribe(processor_plan, token)
+        if hasattr(self, 'customer_id'):
+            customer_id = self.customer_id
+        else:
+            customer_id = None
+
+        return PROCESSOR.subscribe(processor_plan, token, customer=customer_id)
     
     def trial(self):
         """
@@ -26,7 +31,10 @@ class Billable:
         """
         Cancel a subscription
         """
-        return PROCESSOR.cancel()
+        return PROCESSOR.cancel(self.plan_id)
+
+    def create_customer(self, description, token):
+        return PROCESSOR.create_customer(description, token)
     
     def quantity(self, quantity):
         """
@@ -59,17 +67,12 @@ class Billable:
         """
         pass
     
-    def is_subscribed(self):
+    def is_subscribed(self, plan_name=None):
         """
         Check if a user is subscribed
         """
-        return PROCESSOR.is_subscribed()
-    
-    def has_plan(self):
-        """
-        Check if a user is on a specific plan
-        """
-        pass
+
+        return PROCESSOR.is_subscribed(self.customer_id, plan_name=plan_name)
 
     def is_cancelled(self):
         """
