@@ -37,37 +37,35 @@ class BillingStripeDriver:
         return self.subscribe(*args, **kwargs)
 
     def on_trial(self, plan_id=None):
-        if plan_id:
-            subscription = self._get_subscription(plan_id)
-            if subscription['trial_end'] is None:
-                return False
-
-            trial = pendulum.from_timestamp(subscription['trial_end'])
-
-            if trial.is_past():
-                return False
-
-            return True
-        
-    def is_subscribed(self, customer_id, plan_name=None):
         try:
-            # get the customer
-            customer = stripe.Customer.retrieve(customer_id)
-            if plan_name is None and 'plan' in customer['subscriptions']['data'][0]['items']['data'][0]:
-                return True
-            if plan_name in customer['subscriptions']['data'][0]['items']['data'][0]['plan']['id']:
-                return True
-            return False
+            if plan_id:
+                subscription = self._get_subscription(plan_id)
+                # print(subscription)
+                if subscription['status'] == 'trialing':
+                    return True
+
+                return False
         except InvalidRequestError:
             return False
-        except IndexError:
-            return False
+        
         return None
+        
+    def is_subscribed(self, plan_id, plan_name=None):
+        try:
+            # get the plan
+            subscription = self._get_subscription(plan_id)
+            if subscription['status'] in ('active', 'trialing'):
+                return True
+
+        except InvalidRequestError:
+            return False
+        
+        return False
     
-    def cancel(self, plan_id):
+    def cancel(self, plan_id, now=False):
         subscription = stripe.Subscription.retrieve(plan_id)
-        delete = subscription.delete()
-        if delete['status'] == 'canceled':
+
+        if subscription.delete(at_period_end= not now):
             return True
         return False
 

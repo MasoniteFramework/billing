@@ -25,7 +25,6 @@ class Billable:
     def trial(self, days=False):
         """
         Put user on trial
-        TODO
         """
 
         self._trial = days
@@ -39,11 +38,11 @@ class Billable:
             plan_id = self.plan_id
         return PROCESSOR.on_trial(plan_id)
 
-    def cancel(self):
+    def cancel(self, now=False):
         """
         Cancel a subscription
         """
-        return PROCESSOR.cancel(self.plan_id)
+        return PROCESSOR.cancel(self.plan_id, now=now)
 
     def create_customer(self, description, token):
         return PROCESSOR.create_customer(description, token)
@@ -67,8 +66,6 @@ class Billable:
 
     """ Checking Subscription Status """
 
-
-    
     def on_grace_period(self):
         """
         Check if a user is on a grace period
@@ -80,7 +77,7 @@ class Billable:
         Check if a user is subscribed
         """
 
-        return PROCESSOR.is_subscribed(self.customer_id, plan_name=plan_name)
+        return PROCESSOR.is_subscribed(self.plan_id, plan_name=plan_name)
 
     def is_cancelled(self):
         """
