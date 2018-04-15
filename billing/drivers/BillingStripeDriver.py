@@ -62,6 +62,17 @@ class BillingStripeDriver:
         
         return False
     
+    def is_canceled(self, plan_id):
+        try:
+            # get the plan
+            subscription = self._get_subscription(plan_id)
+            if subscription['cancel_at_period_end'] is True:
+                return True
+        except InvalidRequestError:
+            return False
+        
+        return False
+    
     def cancel(self, plan_id, now=False):
         subscription = stripe.Subscription.retrieve(plan_id)
 

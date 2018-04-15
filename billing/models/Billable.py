@@ -79,11 +79,11 @@ class Billable:
 
         return PROCESSOR.is_subscribed(self.plan_id, plan_name=plan_name)
 
-    def is_cancelled(self):
+    def is_canceled(self):
         """
         Check if the user was subscribed but cancelled their subscription
         """
-        pass
+        return PROCESSOR.is_canceled(self.plan_id)
 
     """ Upgrading and changing a plan """
 

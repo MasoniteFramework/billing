@@ -73,3 +73,14 @@ def test_subscribe_cancel_subscription_at_end_of_period():
     assert user.is_subscribed() is True
     user.cancel(now=True)
     assert user.is_subscribed() is False
+
+def test_subscription_is_canceled():
+    subscription = user.subscribe('default', 'masonite-flash', 'tok_amex')
+    user.plan_id = subscription
+    
+    assert user.is_canceled() == False
+    user.cancel(now=False)
+    assert user.is_canceled() == True
+
+    user.cancel(now=True)
+    assert user.is_canceled() == False
