@@ -1,0 +1,6 @@
+venv
+masonite_billing.egg-info
+.vscode
+.cache
+.env
+**.pyc
