@@ -15,6 +15,7 @@ class User(Billable):
 user = User()
 user.customer_id = user.create_customer('test-customer', 'tok_amex')
 
+
 def test_subscription_raises_exeption():
     with pytest.raises(PlanNotFound):
         user.subscribe('default', 'no-plan', 'tok_amex')
@@ -48,3 +49,14 @@ def test_cancel_billing():
     assert user.cancel() is True
     assert user.is_subscribed('masonite-flash') is False
     assert user.is_subscribed() is False
+
+def test_on_trial():
+    subscription = user.subscribe('default', 'masonite-flash', 'tok_amex')
+    user.plan_id = subscription
+    assert user.on_trial() is False
+    assert user.cancel() is True
+
+    subscription = user.trial(days=7).subscribe('default', 'masonite-flash', 'tok_amex')
+    user.plan_id = subscription
+    assert user.on_trial() is True
+    assert user.cancel() is True

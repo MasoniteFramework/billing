@@ -9,6 +9,7 @@ except ImportError:
 class Billable:
 
     _tax = False
+    _trial = 0
 
     def subscribe(self, local_plan, processor_plan, token):
         """
@@ -19,14 +20,25 @@ class Billable:
         else:
             customer_id = None
 
-        return PROCESSOR.subscribe(processor_plan, token, customer=customer_id)
+        return PROCESSOR.subscribe(processor_plan, token, customer=customer_id, trial_period_days=self._trial)
     
-    def trial(self):
+    def trial(self, days=False):
         """
         Put user on trial
+        TODO
         """
-        return PROCESSOR.trial()
-    
+
+        self._trial = days
+        return self
+
+    def on_trial(self, plan_id=None):
+        """
+        Check if a user is on trial
+        """
+        if not plan_id:
+            plan_id = self.plan_id
+        return PROCESSOR.on_trial(plan_id)
+
     def cancel(self):
         """
         Cancel a subscription
@@ -55,11 +67,7 @@ class Billable:
 
     """ Checking Subscription Status """
 
-    def on_trial(self):
-        """
-        Check if a user is on trial
-        """
-        pass
+
     
     def on_grace_period(self):
         """

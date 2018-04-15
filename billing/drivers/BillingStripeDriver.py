@@ -1,6 +1,7 @@
 import stripe
 from stripe.error import InvalidRequestError
 from billing.exceptions import PlanNotFound
+import pendulum
 
 try:
     from config import billing
@@ -10,14 +11,20 @@ except ImportError:
 
 class BillingStripeDriver:
 
-    def subscribe(self, plan, token, customer=None):
+    def subscribe(self, plan, token, customer=None, **kwargs):
         # create a customer
         if not customer:
             customer = self._create_customer('description', token)
 
         try:
-            subscription = self._create_subscription(customer, {'plan': plan})
+            subscription = self._create_subscription(customer,
+                {
+                    'plan': plan
+                },
+                **kwargs
+            )
             return subscription['id']
+
         except InvalidRequestError as e:
             if 'No such plan' in str(e):
                 raise PlanNotFound('The {0} plan was not found in Stripe'.format(plan))
@@ -25,6 +32,22 @@ class BillingStripeDriver:
                 return False
         
         return None
+
+    def trial(self, *args, **kwargs):
+        return self.subscribe(*args, **kwargs)
+
+    def on_trial(self, plan_id=None):
+        if plan_id:
+            subscription = self._get_subscription(plan_id)
+            if subscription['trial_end'] is None:
+                return False
+
+            trial = pendulum.from_timestamp(subscription['trial_end'])
+
+            if trial.is_past():
+                return False
+
+            return True
         
     def is_subscribed(self, customer_id, plan_name=None):
         try:
@@ -58,11 +81,15 @@ class BillingStripeDriver:
             source=token # obtained with Stripe.js
         )
     
-    def _create_subscription(self, customer, items):
+    def _create_subscription(self, customer, items=[], **kwargs):
         if not isinstance(customer, str):
             customer = customer['id']
 
         return stripe.Subscription.create(
             customer=customer,
-            items=[items]
+            items=[items],
+            **kwargs
         )
+    
+    def _get_subscription(self, plan_id):  
+        return stripe.Subscription.retrieve(plan_id)
