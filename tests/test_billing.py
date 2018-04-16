@@ -84,3 +84,16 @@ def test_subscription_is_canceled():
 
     user.cancel(now=True)
     assert user.is_canceled() == False
+
+def test_skip_trial():
+    subscription = user.subscribe('default', 'masonite-test', 'tok_amex')
+    user.plan_id = subscription
+
+    assert user.on_trial() is True
+    user.cancel(now=True)
+
+    subscription = user.skip_trial().subscribe('default', 'masonite-test', 'tok_amex')
+    user.plan_id = subscription
+
+    assert user.on_trial() is False
+    user.cancel(now=True)

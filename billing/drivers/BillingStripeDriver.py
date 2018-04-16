@@ -11,6 +11,8 @@ except ImportError:
 
 class BillingStripeDriver:
 
+    _subscription_args = {}
+
     def subscribe(self, plan, token, customer=None, **kwargs):
         # create a customer
         if not customer:
@@ -18,9 +20,7 @@ class BillingStripeDriver:
 
         try:
             subscription = self._create_subscription(customer,
-                {
-                    'plan': plan
-                },
+                plan=plan,
                 **kwargs
             )
             return subscription['id']
@@ -33,21 +33,22 @@ class BillingStripeDriver:
         
         return None
 
-    def trial(self, *args, **kwargs):
-        return self.subscribe(*args, **kwargs)
+    def trial(self, days=0):
+        self._subscription_args.update({'trial_period_days': days})
+        return self
 
     def on_trial(self, plan_id=None):
         try:
             if plan_id:
                 subscription = self._get_subscription(plan_id)
-                # print(subscription)
+                
                 if subscription['status'] == 'trialing':
                     return True
 
                 return False
+            
         except InvalidRequestError:
             return False
-        
         return None
         
     def is_subscribed(self, plan_id, plan_name=None):
@@ -84,21 +85,29 @@ class BillingStripeDriver:
         customer = self._create_customer('test-customer', 'tok_amex')
         return customer['id']
 
+    def skip_trial(self):
+        self._subscription_args.update({'trial_end': 'now'})
+        return self
+
     def _create_customer(self, description, token):
         return stripe.Customer.create(
             description=description,
             source=token # obtained with Stripe.js
         )
     
-    def _create_subscription(self, customer, items=[], **kwargs):
+    def _create_subscription(self, customer, **kwargs):
         if not isinstance(customer, str):
             customer = customer['id']
 
-        return stripe.Subscription.create(
+        for key, value in self._subscription_args.items():
+            kwargs[key] = value
+
+        subscription = stripe.Subscription.create(
             customer=customer,
-            items=[items],
-            **kwargs
+            **kwargs,  
         )
+        self._subscription_args = {}
+        return subscription
     
     def _get_subscription(self, plan_id):  
         return stripe.Subscription.retrieve(plan_id)

@@ -20,14 +20,14 @@ class Billable:
         else:
             customer_id = None
 
-        return PROCESSOR.subscribe(processor_plan, token, customer=customer_id, trial_period_days=self._trial)
+        return PROCESSOR.subscribe(processor_plan, token, customer=customer_id)
     
     def trial(self, days=False):
         """
         Put user on trial
         """
 
-        self._trial = days
+        PROCESSOR.trial(days)
         return self
 
     def on_trial(self, plan_id=None):
@@ -63,12 +63,14 @@ class Billable:
         """
         Used to create the transaction
         """
+        pass
 
     """ Checking Subscription Status """
 
     def on_grace_period(self):
         """
         Check if a user is on a grace period
+        TODO
         """
         pass
     
@@ -97,7 +99,8 @@ class Billable:
         """
         Skip any trial that the plan may have and charge the user
         """
-        pass
+        PROCESSOR.skip_trial()
+        return self
     
     def prorate(self, bool):
         """
