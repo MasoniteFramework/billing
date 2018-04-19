@@ -44,7 +44,6 @@ class BillingStripeDriver:
                 
                 if subscription['status'] == 'trialing':
                     return True
-
                 return False
             
         except InvalidRequestError:
@@ -71,7 +70,7 @@ class BillingStripeDriver:
         try:
             # get the plan
             subscription = self._get_subscription(plan_id)
-            if subscription['cancel_at_period_end'] is True:
+            if subscription['cancel_at_period_end'] is True and subscription['status'] == 'active':
                 return True
         except InvalidRequestError:
             return False
@@ -106,6 +105,13 @@ class BillingStripeDriver:
             return True
         else:
             return False
+        
+    def card(self, customer_id, token):
+        stripe.Customer.modify(customer_id,
+            source=token,
+        )
+
+        return True
 
     def swap(self, plan, new_plan, **kwargs):
         subscription = stripe.Subscription.retrieve(plan)
@@ -117,6 +123,17 @@ class BillingStripeDriver:
         }]
         )
         return True
+
+    def resume(self, plan_id):
+        subscription = stripe.Subscription.retrieve(plan_id)
+        stripe.Subscription.modify(plan_id,
+        cancel_at_period_end = False,
+        items=[{
+            'id': subscription['items']['data'][0].id
+        }]
+        )
+        return True
+
     def _create_customer(self, description, token):
         return stripe.Customer.create(
             description=description,

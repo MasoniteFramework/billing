@@ -13,7 +13,11 @@ class User(Billable):
     pass
 
 user = User()
-user.customer_id = user.create_customer('test-customer', 'tok_amex')
+
+if os.environ.get('STRIPE_CUSTOMER'):
+    user.customer_id = os.getenv('STRIPE_CUSTOMER')
+else:
+    user.customer_id = user.create_customer('test-customer', 'tok_amex')
 
 
 def test_subscription_raises_exeption():
@@ -116,3 +120,18 @@ def test_swap_plan():
     assert user.is_subscribed('masonite-test') is False
 
     assert user.cancel(now=True)
+
+def test_change_card():
+    assert user.card('tok_amex') is True
+
+def test_cancel_and_resume_plan():
+    subscription = user.skip_trial().subscribe('default', 'masonite-test', 'tok_amex')
+    user.plan_id = subscription
+
+    # assert user.is_canceled() is False
+    assert user.cancel() is True
+    assert user.is_canceled() is True
+    assert user.resume()
+    assert user.is_canceled() is False
+
+    user.cancel(now=True)

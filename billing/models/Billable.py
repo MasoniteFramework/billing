@@ -109,6 +109,7 @@ class Billable:
     def prorate(self, bool):
         """
         Whether the user should be prorated or not
+        TODO: should be only parameters
         """
         pass
     
@@ -116,38 +117,10 @@ class Billable:
         """
         Resume a trial
         """
-        pass
+        return PROCESSOR.resume(self.plan_id)
     
-    def upgrade_card(self):
+    def card(self, token):
         """
         Change the card or token
         """
-        pass
-
-"""
-## Creating
-* subscribe
-    * resubscribing
-* trial
-    * specify number of days?
-* cancel
-* quantity
-* _tax
-* charge
-* create
-
-## Checking
-* on_trial
-* on_grace_period
-* is_subscribed
-* has_plan
-* is_cancelled
-
-## Upgrading
-* swap
-* skip_trial
-* prorate
-* resume
-* upgrade_card
-
-"""
+        return PROCESSOR.card(self.customer_id, token)
