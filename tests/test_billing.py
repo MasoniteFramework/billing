@@ -104,4 +104,15 @@ def test_charge_customer():
     assert user.charge(999, token='tok_amex')
     assert user.charge(299, metadata={'name': 'test'})
     assert user.charge(299, description='Charge For test@email.com')
-    
+
+def test_swap_plan():
+    subscription = user.subscribe('default', 'masonite-test', 'tok_amex')
+    user.plan_id = subscription
+
+    assert user.is_subscribed('masonite-test')
+    assert user.swap('masonite-flash') is True
+    assert user.is_subscribed() is True
+    assert user.is_subscribed('masonite-flash') is True
+    assert user.is_subscribed('masonite-test') is False
+
+    assert user.cancel(now=True)

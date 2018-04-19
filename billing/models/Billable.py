@@ -69,12 +69,6 @@ class Billable:
         
         return PROCESSOR.charge(amount, **kwargs)
 
-    def create(self, token):
-        """
-        Used to create the transaction
-        """
-        pass
-
     """ Checking Subscription Status """
 
     def on_grace_period(self):
@@ -99,11 +93,11 @@ class Billable:
 
     """ Upgrading and changing a plan """
 
-    def swap(self):
+    def swap(self, new_plan, **kwargs):
         """
         Change the current plan
         """
-        pass
+        return PROCESSOR.swap(self.plan_id, new_plan, **kwargs)
     
     def skip_trial(self):
         """

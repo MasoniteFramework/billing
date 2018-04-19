@@ -55,7 +55,11 @@ class BillingStripeDriver:
         try:
             # get the plan
             subscription = self._get_subscription(plan_id)
-            if subscription['status'] in ('active', 'trialing'):
+            if not plan_name:
+                if subscription['status'] in ('active', 'trialing'):
+                    return True
+            
+            if subscription["items"]["data"][0]['plan']['id'] == plan_name:
                 return True
 
         except InvalidRequestError:
@@ -103,6 +107,16 @@ class BillingStripeDriver:
         else:
             return False
 
+    def swap(self, plan, new_plan, **kwargs):
+        subscription = stripe.Subscription.retrieve(plan)
+        subscription = stripe.Subscription.modify(plan,
+        cancel_at_period_end=False,
+        items=[{
+            'id': subscription['items']['data'][0].id,
+            'plan': new_plan,
+        }]
+        )
+        return True
     def _create_customer(self, description, token):
         return stripe.Customer.create(
             description=description,
