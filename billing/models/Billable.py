@@ -53,11 +53,21 @@ class Billable:
         """
         self._quantity = quantity
 
-    def charge(self):
+    def charge(self, amount, **kwargs):
         """
         Charge a one time charge for a user
         """
-        pass
+
+        if not kwargs.get('token'):
+            kwargs.update({'customer': self.customer_id})
+        else:
+            kwargs.update({'source': kwargs.get('token')})
+            del kwargs['token']
+        
+        if not kwargs.get('description'):
+            kwargs.update({'description': 'Charge For {0}'.format(self.email)})
+        
+        return PROCESSOR.charge(amount, **kwargs)
 
     def create(self, token):
         """

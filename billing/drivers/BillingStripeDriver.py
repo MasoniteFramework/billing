@@ -88,6 +88,20 @@ class BillingStripeDriver:
     def skip_trial(self):
         self._subscription_args.update({'trial_end': 'now'})
         return self
+    
+    def charge(self, amount, **kwargs):
+        if not kwargs.get('currency'):
+            kwargs.update({'currency': billing.DRIVERS['stripe']['currency']})
+
+        charge = stripe.Charge.create(
+            amount=amount,
+            **kwargs,
+        )
+
+        if charge['status'] == 'succeeded':
+            return True
+        else:
+            return False
 
     def _create_customer(self, description, token):
         return stripe.Customer.create(

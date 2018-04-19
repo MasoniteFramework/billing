@@ -97,3 +97,11 @@ def test_skip_trial():
 
     assert user.on_trial() is False
     user.cancel(now=True)
+
+def test_charge_customer():
+    user.email = 'test@email.com'
+    assert user.charge(999) is True
+    assert user.charge(999, token='tok_amex')
+    assert user.charge(299, metadata={'name': 'test'})
+    assert user.charge(299, description='Charge For test@email.com')
+    
