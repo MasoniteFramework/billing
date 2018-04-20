@@ -23,7 +23,7 @@ class BillingStripeDriver:
                 plan=plan,
                 **kwargs
             )
-            return subscription['id']
+            return subscription
 
         except InvalidRequestError as e:
             if 'No such plan' in str(e):

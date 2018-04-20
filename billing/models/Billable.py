@@ -15,14 +15,24 @@ class Billable:
         """
         Subscribe user to a billing plan
         """
+        if not self.customer_id:
+            self.create_customer('Customer {0}'.format(self.email), token)
+        
+        if self.is_subscribed(processor_plan):
+            return True
+
         if hasattr(self, 'customer_id'):
             customer_id = self.customer_id
         else:
             customer_id = None
-        
-        
 
-        return PROCESSOR.subscribe(processor_plan, token, customer=customer_id)
+        subscription = PROCESSOR.subscribe(processor_plan, token, customer=customer_id)
+        self.plan_id = subscription['id']
+        self.save()
+
+        self._save_subscription(subscription, processor_plan)
+
+        return True
     
     def trial(self, days=False):
         """
