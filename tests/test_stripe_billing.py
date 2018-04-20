@@ -22,17 +22,17 @@ else:
 
 def test_subscription_raises_exeption():
     with pytest.raises(PlanNotFound):
-        user.subscribe('default', 'no-plan', 'tok_amex')
+        user.subscribe('no-plan', 'tok_amex')
 
 def test_subscription_subscribes_user():
-    subscription = user.subscribe('default', 'masonite-test', 'tok_amex')
+    subscription = user.subscribe('masonite-test', 'tok_amex')
     assert subscription.startswith('sub')
     user.plan_id = subscription
     user.cancel(now=True)
 
 
 def test_is_subscribed():
-    subscription = user.subscribe('default', 'masonite-test', 'tok_amex')
+    subscription = user.subscribe('masonite-test', 'tok_amex')
     user.plan_id = subscription
 
     assert user.is_subscribed() is True
@@ -46,7 +46,7 @@ def test_is_subscribed():
     assert wrong_token_user.is_subscribed() is False
 
 def test_cancel_billing():
-    subscription = user.subscribe('default', 'masonite-flash', 'tok_amex')
+    subscription = user.subscribe('masonite-flash', 'tok_amex')
     user.plan_id = subscription
     
     assert user.is_subscribed('masonite-flash') is True
@@ -55,12 +55,12 @@ def test_cancel_billing():
     assert user.is_subscribed() is False
 
 def test_on_trial():
-    subscription = user.subscribe('default', 'masonite-flash', 'tok_amex')
+    subscription = user.subscribe('masonite-flash', 'tok_amex')
     user.plan_id = subscription
     assert user.on_trial() is False
     assert user.cancel(now=True) is True
 
-    subscription = user.trial(days=7).subscribe('default', 'masonite-flash', 'tok_amex')
+    subscription = user.trial(days=7).subscribe('masonite-flash', 'tok_amex')
     user.plan_id = subscription
     assert user.on_trial() is True
     assert user.cancel(now=False) is True
@@ -69,7 +69,7 @@ def test_on_trial():
     assert user.on_trial() is False
 
 def test_subscribe_cancel_subscription_at_end_of_period():
-    subscription = user.subscribe('default', 'masonite-flash', 'tok_amex')
+    subscription = user.subscribe('masonite-flash', 'tok_amex')
     user.plan_id = subscription
 
     assert user.is_subscribed() is True
@@ -79,7 +79,7 @@ def test_subscribe_cancel_subscription_at_end_of_period():
     assert user.is_subscribed() is False
 
 def test_subscription_is_canceled():
-    subscription = user.subscribe('default', 'masonite-flash', 'tok_amex')
+    subscription = user.subscribe('masonite-flash', 'tok_amex')
     user.plan_id = subscription
     
     assert user.is_canceled() == False
@@ -90,13 +90,13 @@ def test_subscription_is_canceled():
     assert user.is_canceled() == False
 
 def test_skip_trial():
-    subscription = user.subscribe('default', 'masonite-test', 'tok_amex')
+    subscription = user.subscribe('masonite-test', 'tok_amex')
     user.plan_id = subscription
 
     assert user.on_trial() is True
     user.cancel(now=True)
 
-    subscription = user.skip_trial().subscribe('default', 'masonite-test', 'tok_amex')
+    subscription = user.skip_trial().subscribe('masonite-test', 'tok_amex')
     user.plan_id = subscription
 
     assert user.on_trial() is False
@@ -110,7 +110,7 @@ def test_charge_customer():
     assert user.charge(299, description='Charge For test@email.com')
 
 def test_swap_plan():
-    subscription = user.subscribe('default', 'masonite-test', 'tok_amex')
+    subscription = user.subscribe('masonite-test', 'tok_amex')
     user.plan_id = subscription
 
     assert user.is_subscribed('masonite-test')
@@ -125,7 +125,7 @@ def test_change_card():
     assert user.card('tok_amex') is True
 
 def test_cancel_and_resume_plan():
-    subscription = user.skip_trial().subscribe('default', 'masonite-test', 'tok_amex')
+    subscription = user.skip_trial().subscribe('masonite-test', 'tok_amex')
     user.plan_id = subscription
 
     # assert user.is_canceled() is False

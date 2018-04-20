@@ -11,7 +11,7 @@ class Billable:
     _tax = False
     _trial = 0
 
-    def subscribe(self, local_plan, processor_plan, token):
+    def subscribe(self, processor_plan, token):
         """
         Subscribe user to a billing plan
         """
@@ -19,6 +19,8 @@ class Billable:
             customer_id = self.customer_id
         else:
             customer_id = None
+        
+        
 
         return PROCESSOR.subscribe(processor_plan, token, customer=customer_id)
     
