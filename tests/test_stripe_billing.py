@@ -5,12 +5,14 @@ from dotenv import find_dotenv, load_dotenv
 from billing.models.Billable import Billable
 from billing.exceptions import PlanNotFound
 from masonite.app import App
+from billing.models.Subscription import Subscription
 
 load_dotenv(find_dotenv())
 
 
 class User(Billable):
     plan_id = None
+    id = 1
     def save(self):
         pass
 

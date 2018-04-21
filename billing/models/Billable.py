@@ -1,4 +1,6 @@
 from billing.managers.BillingManager import BillingManager
+from .Subscription import Subscription
+import pendulum
 try:
     from config import billing
     PROCESSOR = BillingManager().create_driver(billing.DRIVER)
@@ -49,6 +51,9 @@ class Billable:
         self.plan_id = subscription['id']
         self.save()
 
+        # TODO add to subscription model
+        self._save_subscription_model(processor_plan, subscription)
+
         return True
     
     def trial(self, days=False):
@@ -71,7 +76,22 @@ class Billable:
         """
         Cancel a subscription
         """
-        return PROCESSOR.cancel(self.plan_id, now=now)
+        cancel = PROCESSOR.cancel(self.plan_id, now=now)
+
+        if cancel:
+            if now:
+                # delete it now
+                self._get_subscription().delete()
+                return True
+            else:
+                # update the ended at date
+                subscription = self._get_subscription()
+                subscription.ends_at = cancel['ended_at']
+                subscription.save()
+                return True
+        return False
+
+
     
     def plan(self):
         return PROCESSOR.plan(self.plan_id)
@@ -159,3 +179,28 @@ class Billable:
         Change the card or token
         """
         return PROCESSOR.card(self.customer_id, token)
+    
+    def _get_subscription(self):
+        return Subscription.where('plan_id', self.plan_id).first()
+    
+    def _save_subscription_model(self, processor_plan, subscription_object): 
+
+        trial_ends_at = None
+        ends_at = None
+        if subscription_object['trial_end']:
+            trial_ends_at = pendulum.from_timestamp(subscription_object['trial_end']).to_datetime_string()
+        
+        if subscription_object['ended_at']:
+            ends_at = pendulum.from_timestamp(subscription_object['ended_at']).to_datetime_string()
+
+        subscription = Subscription.create(
+            user_id = self.id,
+            plan = processor_plan,
+            plan_id = subscription_object['id'],
+            plan_name = subscription_object['plan']['name'],
+            quantity = 1,
+            trial_ends_at = trial_ends_at,
+            ends_at = ends_at,
+        )
+
+        return subscription

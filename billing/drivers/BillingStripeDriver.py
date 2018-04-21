@@ -81,7 +81,7 @@ class BillingStripeDriver:
         subscription = stripe.Subscription.retrieve(plan_id)
 
         if subscription.delete(at_period_end= not now):
-            return True
+            return subscription
         return False
 
     def create_customer(self, description, token):
