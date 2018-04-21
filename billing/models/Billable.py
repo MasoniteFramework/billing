@@ -16,10 +16,10 @@ Integrate with a subscriptions table
 58 sec
 68
 
-on_trial
-is_subscribed()
-plan()
-is_canceled()
+on_trial - [x]
+is_subscribed() - [x]
+plan() - [x]
+is_canceled() - [x]
 
 
 Needs to be super tested to the max (~100% test coverage)
@@ -33,9 +33,6 @@ Only focus on users table
 '''
 
 class Billable:
-
-    _tax = False
-    _trial = 0
 
     def subscribe(self, processor_plan, token):
         """
@@ -73,9 +70,19 @@ class Billable:
         """
         Check if a user is on trial
         """
+        subscription = self._get_subscription()
+
+        if not subscription:
+            return False
+        
         if not plan_id:
-            plan_id = self.plan_id
-        return PROCESSOR.on_trial(plan_id)
+            if subscription.trial_ends_at and subscription.trial_ends_at.is_future():
+                return True
+        
+        if subscription.plan == plan_id and subscription.trial_ends_at and subscription.trial_ends_at.is_future():
+            return True
+        
+        return False
 
     def cancel(self, now=False):
         """
@@ -91,7 +98,7 @@ class Billable:
             else:
                 # update the ended at date
                 subscription = self._get_subscription()
-                subscription.ends_at = pendulum.from_timestamp(cancel['current_period_end']).to_datetime_string()
+                subscription.ends_at = pendulum.from_timestamp(cancel['current_period_end'])
                 subscription.save()
                 return True
         return False
@@ -163,14 +170,11 @@ class Billable:
 
         if not subscription:
             return False
-        
-        print('trial_ends_at:', subscription.trial_ends_at)
-        print('ends_at:', subscription.ends_at)
 
         if not subscription.trial_ends_at and subscription.ends_at:
             return True
         return False
-        return PROCESSOR.is_canceled(self.plan_id)
+        # return PROCESSOR.is_canceled(self.plan_id)
 
     """ Upgrading and changing a plan """
 
@@ -182,8 +186,8 @@ class Billable:
         subscription = self._get_subscription()
         subscription.plan = swapped_subscription['plan']['id']
         subscription.plan_name = swapped_subscription['plan']['name']
-        subscription.trial_ends_at = pendulum.from_timestamp(swapped_subscription['trial_end']).to_datetime_string()
-        subscription.ends_at = pendulum.from_timestamp(swapped_subscription['current_period_end']).to_datetime_string()
+        subscription.trial_ends_at = pendulum.from_timestamp(swapped_subscription['trial_end'])
+        subscription.ends_at = pendulum.from_timestamp(swapped_subscription['current_period_end'])
         subscription.save()
         return True
     
@@ -226,10 +230,10 @@ class Billable:
         trial_ends_at = None
         ends_at = None
         if subscription_object['trial_end']:
-            trial_ends_at = pendulum.from_timestamp(subscription_object['trial_end']).to_datetime_string()
+            trial_ends_at = pendulum.from_timestamp(subscription_object['trial_end'])
         
         if subscription_object['ended_at']:
-            ends_at = pendulum.from_timestamp(subscription_object['ended_at']).to_datetime_string()
+            ends_at = pendulum.from_timestamp(subscription_object['ended_at'])
 
         subscription = Subscription.create(
             user_id = self.id,
