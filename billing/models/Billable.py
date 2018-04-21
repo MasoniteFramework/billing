@@ -7,31 +7,6 @@ try:
 except ImportError:
     raise ImportError('No configuration file found')
 
-'''
-does not need to hit Stripe API:
-Integrate with a subscriptions table
-
-100 sec
-88 sec
-58 sec
-68
-
-on_trial - [x]
-is_subscribed() - [x]
-plan() - [x]
-is_canceled() - [x]
-
-
-Needs to be super tested to the max (~100% test coverage)
-Needs to do VAT
-Needs to do webhooks
-    * cancels
-    * renewals
-    * subscriptions
-Can do only Stripe
-Only focus on users table
-'''
-
 class Billable:
 
     def subscribe(self, processor_plan, token):
@@ -109,7 +84,6 @@ class Billable:
             return subscription.plan_name
         
         return None
-        # return PROCESSOR.plan(self.plan_id)
 
     def create_customer(self, description, token):
         customer = PROCESSOR._create_customer(description, token)
@@ -160,8 +134,6 @@ class Billable:
         
         return False
 
-        # return PROCESSOR.is_subscribed(self.plan_id, plan_name=plan_name)
-
     def is_canceled(self):
         """
         Check if the user was subscribed but cancelled their subscription
@@ -174,7 +146,6 @@ class Billable:
         if not subscription.trial_ends_at and subscription.ends_at:
             return True
         return False
-        # return PROCESSOR.is_canceled(self.plan_id)
 
     """ Upgrading and changing a plan """
 
@@ -188,8 +159,8 @@ class Billable:
         subscription.plan_name = swapped_subscription['plan']['name']
         subscription.trial_ends_at = pendulum.from_timestamp(swapped_subscription['trial_end'])
         subscription.ends_at = pendulum.from_timestamp(swapped_subscription['current_period_end'])
-        subscription.save()
-        return True
+        return subscription.save()
+        
     
     def skip_trial(self):
         """
@@ -240,7 +211,6 @@ class Billable:
             plan = processor_plan,
             plan_id = subscription_object['id'],
             plan_name = subscription_object['plan']['name'],
-            quantity = 1,
             trial_ends_at = trial_ends_at,
             ends_at = ends_at,
         )
