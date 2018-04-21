@@ -5,6 +5,8 @@ from billing.commands.InstallCommand import InstallCommand
 
 class BillingProvider(ServiceProvider):
 
+    wsgi = False
+
     def register(self):
         self.app.bind('BillingInstallCommand', InstallCommand())
 
