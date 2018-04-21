@@ -11,6 +11,11 @@ except ImportError:
 does not need to hit Stripe API:
 Integrate with a subscriptions table
 
+100 sec
+88 sec
+58 sec
+68
+
 on_trial
 is_subscribed()
 plan()
@@ -86,15 +91,18 @@ class Billable:
             else:
                 # update the ended at date
                 subscription = self._get_subscription()
-                subscription.ends_at = cancel['ended_at']
+                subscription.ends_at = pendulum.from_timestamp(cancel['current_period_end']).to_datetime_string()
                 subscription.save()
                 return True
         return False
-
-
     
     def plan(self):
-        return PROCESSOR.plan(self.plan_id)
+        subscription = self._get_subscription()
+        if subscription:
+            return subscription.plan_name
+        
+        return None
+        # return PROCESSOR.plan(self.plan_id)
 
     def create_customer(self, description, token):
         customer = PROCESSOR._create_customer(description, token)
@@ -137,13 +145,31 @@ class Billable:
         """
         Check if a user is subscribed
         """
+        if not plan_name and self._get_subscription() :
+            return True
+        
+        if self._get_subscription() and plan_name and self._get_subscription().plan == plan_name:
+            return True
+        
+        return False
 
-        return PROCESSOR.is_subscribed(self.plan_id, plan_name=plan_name)
+        # return PROCESSOR.is_subscribed(self.plan_id, plan_name=plan_name)
 
     def is_canceled(self):
         """
         Check if the user was subscribed but cancelled their subscription
         """
+        subscription = self._get_subscription()
+
+        if not subscription:
+            return False
+        
+        print('trial_ends_at:', subscription.trial_ends_at)
+        print('ends_at:', subscription.ends_at)
+
+        if not subscription.trial_ends_at and subscription.ends_at:
+            return True
+        return False
         return PROCESSOR.is_canceled(self.plan_id)
 
     """ Upgrading and changing a plan """
@@ -152,7 +178,14 @@ class Billable:
         """
         Change the current plan
         """
-        return PROCESSOR.swap(self.plan_id, new_plan, **kwargs)
+        swapped_subscription  = PROCESSOR.swap(self.plan_id, new_plan, **kwargs)
+        subscription = self._get_subscription()
+        subscription.plan = swapped_subscription['plan']['id']
+        subscription.plan_name = swapped_subscription['plan']['name']
+        subscription.trial_ends_at = pendulum.from_timestamp(swapped_subscription['trial_end']).to_datetime_string()
+        subscription.ends_at = pendulum.from_timestamp(swapped_subscription['current_period_end']).to_datetime_string()
+        subscription.save()
+        return True
     
     def skip_trial(self):
         """
@@ -172,7 +205,12 @@ class Billable:
         """
         Resume a trial
         """
-        return PROCESSOR.resume(self.plan_id)
+        plan = PROCESSOR.resume(self.plan_id)
+        subscription = self._get_subscription()
+        subscription.ends_at = None
+        subscription.save()
+        return plan
+
     
     def card(self, token):
         """

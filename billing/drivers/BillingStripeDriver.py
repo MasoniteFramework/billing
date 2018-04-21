@@ -121,7 +121,7 @@ class BillingStripeDriver:
             'plan': new_plan,
         }]
         )
-        return True
+        return subscription
 
     def resume(self, plan_id):
         subscription = stripe.Subscription.retrieve(plan_id)

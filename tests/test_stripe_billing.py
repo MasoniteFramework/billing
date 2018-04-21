@@ -130,3 +130,10 @@ def test_cancel_and_resume_plan():
     assert user.is_canceled() is False
 
     user.cancel(now=True)
+
+def test_plan_returns_plan_name():
+    user.skip_trial().subscribe('masonite-test', 'tok_amex')
+
+    assert user.plan() == 'Masonite Test'
+
+    assert user.cancel(now=True)
