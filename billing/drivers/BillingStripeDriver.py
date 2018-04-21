@@ -85,8 +85,7 @@ class BillingStripeDriver:
         return False
 
     def create_customer(self, description, token):
-        customer = self._create_customer('test-customer', 'tok_amex')
-        return customer['id']
+        return self._create_customer('test-customer', 'tok_amex')
 
     def skip_trial(self):
         self._subscription_args.update({'trial_end': 'now'})
@@ -133,6 +132,11 @@ class BillingStripeDriver:
         }]
         )
         return True
+    
+    def plan(self, plan_id):
+        subscription = self._get_subscription(plan_id)
+        return subscription['plan']['name']
+
 
     def _create_customer(self, description, token):
         return stripe.Customer.create(

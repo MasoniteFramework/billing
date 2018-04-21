@@ -4,7 +4,26 @@ try:
     PROCESSOR = BillingManager().create_driver(billing.DRIVER)
 except ImportError:
     raise ImportError('No configuration file found')
-    
+
+'''
+does not need to hit Stripe API:
+Integrate with a subscriptions table
+
+on_trial
+is_subscribed()
+plan()
+is_canceled()
+
+
+Needs to be super tested to the max (~100% test coverage)
+Needs to do VAT
+Needs to do webhooks
+    * cancels
+    * renewals
+    * subscriptions
+Can do only Stripe
+Only focus on users table
+'''
 
 class Billable:
 
@@ -30,8 +49,6 @@ class Billable:
         self.plan_id = subscription['id']
         self.save()
 
-        self._save_subscription(subscription, processor_plan)
-
         return True
     
     def trial(self, days=False):
@@ -55,9 +72,15 @@ class Billable:
         Cancel a subscription
         """
         return PROCESSOR.cancel(self.plan_id, now=now)
+    
+    def plan(self):
+        return PROCESSOR.plan(self.plan_id)
 
     def create_customer(self, description, token):
-        return PROCESSOR.create_customer(description, token)
+        customer = PROCESSOR._create_customer(description, token)
+        self.customer_id = customer['id']
+        self.save()
+        return self.customer_id
     
     def quantity(self, quantity):
         """
