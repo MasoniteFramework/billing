@@ -153,12 +153,21 @@ class Billable:
         """
         Change the current plan
         """
+        trial_ends_at = None
+        ends_at = None
         swapped_subscription  = PROCESSOR.swap(self.plan_id, new_plan, **kwargs)
+
+        if swapped_subscription['trial_end']:
+            trial_ends_at = pendulum.from_timestamp(swapped_subscription['trial_end'])
+        
+        if swapped_subscription['current_period_end']:
+            ends_at = pendulum.from_timestamp(swapped_subscription['current_period_end'])
+
         subscription = self._get_subscription()
         subscription.plan = swapped_subscription['plan']['id']
         subscription.plan_name = swapped_subscription['plan']['name']
-        subscription.trial_ends_at = pendulum.from_timestamp(swapped_subscription['trial_end'])
-        subscription.ends_at = pendulum.from_timestamp(swapped_subscription['current_period_end'])
+        subscription.trial_ends_at = trial_ends_at
+        subscription.ends_at = ends_at
         return subscription.save()
         
     
