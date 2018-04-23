@@ -156,10 +156,11 @@ def test_is_on_trial_after_trial():
 def test_subscription_is_over():
     user.skip_trial().subscribe('masonite-test', 'tok_amex')
     assert user.is_subscribed() is True
+    assert user.on_trial() is False
 
-    # set the trial to an expired time
+    # set the subscription to an expired time
     subscription = user._get_subscription()
-    subscription.ends_at = pendulum.now().subtract(days=1)
+    subscription.ends_at = pendulum.now().subtract(minutes=1)
     subscription.save()
 
     assert user.on_trial() is False
