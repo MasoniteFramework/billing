@@ -126,12 +126,19 @@ class Billable:
         """
         Check if a user is subscribed
         """
-        if not plan_name and self._get_subscription() :
-            return True
-        
-        if self._get_subscription() and plan_name and self._get_subscription().plan == plan_name:
-            return True
-        
+
+        # If the subscription exists
+        if self._get_subscription():
+            # If the subscription does not expire OR the subscription ends at a time in the future
+            if not self._get_subscription().ends_at or ( self._get_subscription().ends_at and self._get_subscription().ends_at.is_future()):
+                # If the plan name equals the plan name specified
+                if plan_name and self._get_subscription().plan == plan_name: 
+                    return True
+                
+                # if the plan name was left out
+                if not plan_name:
+                    return True
+
         return False
 
     def is_canceled(self):

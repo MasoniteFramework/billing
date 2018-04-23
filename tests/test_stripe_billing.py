@@ -6,6 +6,7 @@ from billing.models.Billable import Billable
 from billing.exceptions import PlanNotFound
 from masonite.app import App
 from billing.models.Subscription import Subscription
+import pendulum
 
 load_dotenv(find_dotenv())
 
@@ -137,3 +138,31 @@ def test_plan_returns_plan_name():
     assert user.plan() == 'Masonite Test'
 
     assert user.cancel(now=True)
+
+def test_is_on_trial_after_trial():
+    user.subscribe('masonite-test', 'tok_amex')
+    assert user.on_trial()
+
+    # set the trial to an expired time
+    subscription = user._get_subscription()
+    subscription.trial_ends_at = pendulum.now().subtract(days=1)
+    subscription.save()
+
+    assert user.on_trial() is False
+    assert user.on_trial() is False
+
+    user.cancel(now=True)
+
+def test_subscription_is_over():
+    user.skip_trial().subscribe('masonite-test', 'tok_amex')
+    assert user.is_subscribed() is True
+
+    # set the trial to an expired time
+    subscription = user._get_subscription()
+    subscription.ends_at = pendulum.now().subtract(days=1)
+    subscription.save()
+
+    assert user.on_trial() is False
+    assert user.is_subscribed() is False
+
+    user.cancel(now=True)
