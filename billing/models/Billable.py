@@ -234,13 +234,24 @@ class Billable:
         if subscription_object['ended_at']:
             ends_at = pendulum.from_timestamp(subscription_object['ended_at'])
 
-        subscription = Subscription.create(
-            user_id = self.id,
-            plan = processor_plan,
-            plan_id = subscription_object['id'],
-            plan_name = subscription_object['plan']['name'],
-            trial_ends_at = trial_ends_at,
-            ends_at = ends_at,
-        )
+        subscription = Subscription.where('plan_id', self.plan_id).first()
+        if subscription:
+            subscription.plan = processor_plan
+            subscription.plan_id = subscription_object['id']
+            subscription.plan_name = subscription_object['plan']['name']
+            subscription.trial_ends_at = trial_ends_at
+            subscription.ends_at = ends_at
+            subscription.save()
+        else:
+            # Create a new plan
+
+            subscription = Subscription.create(
+                user_id = self.id,
+                plan = processor_plan,
+                plan_id = subscription_object['id'],
+                plan_name = subscription_object['plan']['name'],
+                trial_ends_at = trial_ends_at,
+                ends_at = ends_at,
+            )
 
         return subscription
