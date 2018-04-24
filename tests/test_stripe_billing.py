@@ -1,6 +1,5 @@
 import os
 import pytest
-import time
 
 from dotenv import find_dotenv, load_dotenv
 from billing.models.Billable import Billable
@@ -32,14 +31,10 @@ def test_subscription_raises_exeption():
     with pytest.raises(PlanNotFound):
         user.subscribe('no-plan', 'tok_amex')
 
-time.sleep(2)
-
 def test_subscription_subscribes_user():
     user.subscribe('masonite-test', 'tok_amex')
     assert user.plan_id.startswith('sub')
     user.cancel(now=True)
-
-time.sleep(2)
 
 def test_is_subscribed():
     user.subscribe('masonite-test', 'tok_amex')
@@ -54,8 +49,6 @@ def test_is_subscribed():
     wrong_token_user.plan_id = 'incorrect_token'
     assert wrong_token_user.is_subscribed() is False
 
-time.sleep(2)
-
 
 def test_cancel_billing():
     user.subscribe('masonite-flash', 'tok_amex')
@@ -64,8 +57,6 @@ def test_cancel_billing():
     assert user.cancel(now=True) is True
     assert user.is_subscribed('masonite-flash') is False
     assert user.is_subscribed() is False
-
-time.sleep(2)
 
 
 def test_on_trial():
@@ -80,8 +71,6 @@ def test_on_trial():
     assert user.cancel(now=True) is True
     assert user.on_trial() is False
 
-time.sleep(2)
-
 
 def test_subscribe_cancel_subscription_at_end_of_period():
     user.subscribe('masonite-flash', 'tok_amex')
@@ -91,8 +80,6 @@ def test_subscribe_cancel_subscription_at_end_of_period():
     assert user.is_subscribed() is True
     user.cancel(now=True)
     assert user.is_subscribed() is False
-
-time.sleep(2)
 
 
 def test_subscription_is_canceled():
@@ -104,8 +91,6 @@ def test_subscription_is_canceled():
 
     user.cancel(now=True)
     assert user.is_canceled() == False
-
-time.sleep(2)
 
 
 def test_skip_trial():
@@ -119,8 +104,6 @@ def test_skip_trial():
     assert user.on_trial() is False
     user.cancel(now=True)
 
-time.sleep(2)
-
 
 def test_charge_customer():
     user.email = 'test@email.com'
@@ -128,8 +111,6 @@ def test_charge_customer():
     assert user.charge(999, token='tok_amex')
     assert user.charge(299, metadata={'name': 'test'})
     assert user.charge(299, description='Charge For test@email.com')
-
-time.sleep(2)
 
 
 def test_swap_plan():
@@ -143,13 +124,9 @@ def test_swap_plan():
 
     assert user.cancel(now=True)
 
-time.sleep(2)
-
 
 def test_change_card():
     assert user.card('tok_amex') is True
-
-time.sleep(2)
 
 
 def test_cancel_and_resume_plan():
@@ -163,8 +140,6 @@ def test_cancel_and_resume_plan():
 
     user.cancel(now=True)
 
-time.sleep(2)
-
 
 def test_plan_returns_plan_name():
     user.skip_trial().subscribe('masonite-test', 'tok_amex')
@@ -172,8 +147,6 @@ def test_plan_returns_plan_name():
     assert user.plan() == 'Masonite Test'
 
     assert user.cancel(now=True)
-
-time.sleep(2)
 
 
 def test_is_on_trial_after_trial():
@@ -189,8 +162,6 @@ def test_is_on_trial_after_trial():
     assert user.on_trial() is False
 
     user.cancel(now=True)
-
-time.sleep(2)
 
 
 def test_subscription_is_over():
