@@ -8,5 +8,5 @@ services:
 before_install:
   - mysql -u root --password="" < tests/travis.sql
   - pip install -r requirements.txt
-  - pip install .
+  - pip install -e .
 script: pytest
