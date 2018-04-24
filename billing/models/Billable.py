@@ -141,10 +141,15 @@ class Billable:
 
         return False
 
-    def was_subscribed(self):
+    def was_subscribed(self, plan=None):
         subscription = self._get_subscription()
+
         if subscription and subscription.ends_at and subscription.ends_at.is_past():
-            return True
+            if plan and subscription.plan == plan:
+                return True
+            elif not plan:
+                return True
+
         
         return False
 

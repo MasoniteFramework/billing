@@ -164,7 +164,11 @@ def test_subscription_is_over():
     subscription.save()
 
     assert user.on_trial() is False
+
     assert user.was_subscribed() is True
+    assert user.was_subscribed('masonite-test') is True
+    assert user.was_subscribed('masonite-flash') is False
+
     assert user.is_subscribed() is False
 
     user.cancel(now=True)
