@@ -141,6 +141,13 @@ class Billable:
 
         return False
 
+    def was_subscribed(self):
+        subscription = self._get_subscription()
+        if subscription and subscription.ends_at and subscription.ends_at.is_past():
+            return True
+        
+        return False
+
     def is_canceled(self):
         """
         Check if the user was subscribed but cancelled their subscription
