@@ -1,12 +1,25 @@
 language: python
+
 python:
-  - "3.4"
-  - "3.5"
-  - "3.6"
+- '3.4'
+- '3.5'
+- '3.6'
+
 services:
-  - mysql
+- mysql
+
 before_install:
-  - mysql -u root --password="" < tests/travis.sql
-  - pip install -r requirements.txt
-  - pip install -e .
+- mysql -u root --password="" < tests/travis.sql
+- pip install -r requirements.txt
+- pip install -e .
+
 script: pytest
+
+deploy:
+  provider: pypi
+  user: josephmancuso
+  password:
+    secure: gFxaUz3aVOoldghAcXcoqi6VcfojUlUG/mzykIovv10xtEtR5REe82GeQ4EDzo36y8nCdqO/FnRhgwEEbxqnEp19A8M2Yu1cyt5jxIVzCDOqQTq07y6eaUspRjlidFsOhIthjYUTVUJ38PO5K/2lOFEcAwH96PDlwg8myOXPFbBBhn9yvdJ1L45QevShpMzMCoDs7YWIGfOijOmCG+5oD4t+C/iRn3+gqD0kUxHBUtcy9IMSCadMn2DD62tvB0e+yjaeHv6lhpXOYsJODnKFr5MxnNtTdagQploUFmZDeglqn2CbKJte36TrxmEZLuJSJLdpjBQxsus5BmQD8v6hywSK9e5Plp70uVjmM8AyNwg0PFv71WOoLziZBbS9qQIfIJVcdDPkGHBYwSWUCvI8odUnsJdUpDcK/cSZDP8oxfF270l/DbVeTiN9Ev+zRgxz0TN6k3v30jckBI0PcUi5QSthUYZ6P/01nx9EomHKnt0rOuVPL2jbWFB/9Wsqyq2n4lMbwDAnNdKF9AaZNnLA/nZLv6dBxfjNliVOTxRLTdG7rNpkHVZx5mxtuZY+C99B31B68GOrmvwQVxalaqJzwdVgMx/Kmibh4Vtxi1HHoEM7+lwYAypnBLmrA/ynOHGMW7k2KAX/X0LC9wHyQF+a+UY2YVOec6x9BRPsQIWK9Cc=
+  on:
+    tags: true
+    python: 3.6
