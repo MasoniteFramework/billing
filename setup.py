@@ -15,6 +15,7 @@ setup(
     install_requires=[
         'masonite',
         'cleo',
+        'stripe',
     ],
     include_package_data=True,
 )
