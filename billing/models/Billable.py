@@ -68,7 +68,10 @@ class Billable:
         if cancel:
             if now:
                 # delete it now
-                self._get_subscription().delete()
+                subscription = self._get_subscription()
+                subscription.ends_at = pendulum.now()
+                subscription.trial_ends_at = None
+                subscription.save()
                 return True
             else:
                 # update the ended at date
@@ -162,8 +165,9 @@ class Billable:
         if not subscription:
             return False
 
-        if not subscription.trial_ends_at and subscription.ends_at:
+        if not subscription.trial_ends_at and subscription.ends_at and subscription.ends_at.is_future():
             return True
+
         return False
 
     """ Upgrading and changing a plan """
@@ -222,7 +226,7 @@ class Billable:
         return PROCESSOR.card(self.customer_id, token)
     
     def _get_subscription(self):
-        return Subscription.where('plan_id', self.plan_id).first()
+        return Subscription.where('user_id', self.id).first()
     
     def _save_subscription_model(self, processor_plan, subscription_object): 
 
@@ -234,7 +238,7 @@ class Billable:
         if subscription_object['ended_at']:
             ends_at = pendulum.from_timestamp(subscription_object['ended_at'])
 
-        subscription = Subscription.where('plan_id', self.plan_id).first()
+        subscription = Subscription.where('user_id', self.id).first()
         if subscription:
             subscription.plan = processor_plan
             subscription.plan_id = subscription_object['id']
