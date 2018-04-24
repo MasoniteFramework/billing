@@ -1,0 +1,9 @@
+language: python
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+services:
+  - mysql
+before_install:
+  - mysql -u root --password="" < test/travis.sql
