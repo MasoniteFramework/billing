@@ -35,6 +35,7 @@ def test_subscription_subscribes_user():
     user.subscribe('masonite-test', 'tok_amex')
     assert user.plan_id.startswith('sub')
     user.cancel(now=True)
+    time.sleep(2)
 
 def test_is_subscribed():
     user.subscribe('masonite-test', 'tok_amex')
@@ -42,6 +43,7 @@ def test_is_subscribed():
     assert user.is_subscribed() is True
     assert user.is_subscribed('masonite-test') is True
     assert user.cancel(now=True)
+    time.sleep(2)
     assert user.is_subscribed('masonite-test') is False
     assert user.is_subscribed() is False
 
@@ -55,6 +57,7 @@ def test_cancel_billing():
     
     assert user.is_subscribed('masonite-flash') is True
     assert user.cancel(now=True) is True
+    time.sleep(2)
     assert user.is_subscribed('masonite-flash') is False
     assert user.is_subscribed() is False
 
@@ -63,12 +66,14 @@ def test_on_trial():
     user.subscribe('masonite-flash', 'tok_amex')
     assert user.on_trial() is False
     assert user.cancel(now=True) is True
+    time.sleep(2)
 
     user.trial(days=7).subscribe('masonite-flash', 'tok_amex')
     assert user.on_trial() is True
     assert user.cancel(now=False) is True
     assert user.on_trial() is True
     assert user.cancel(now=True) is True
+    time.sleep(2)
     assert user.on_trial() is False
 
 
@@ -79,6 +84,7 @@ def test_subscribe_cancel_subscription_at_end_of_period():
     user.cancel(now=False)
     assert user.is_subscribed() is True
     user.cancel(now=True)
+    time.sleep(2)
     assert user.is_subscribed() is False
 
 
@@ -98,11 +104,13 @@ def test_skip_trial():
 
     assert user.on_trial() is True
     user.cancel(now=True)
+    time.sleep(2)
 
     user.skip_trial().subscribe('masonite-test', 'tok_amex')
 
     assert user.on_trial() is False
     user.cancel(now=True)
+    time.sleep(2)
 
 
 def test_charge_customer():
@@ -123,6 +131,7 @@ def test_swap_plan():
     assert user.is_subscribed('masonite-test') is False
 
     assert user.cancel(now=True)
+    time.sleep(2)
 
 
 def test_change_card():
@@ -139,6 +148,7 @@ def test_cancel_and_resume_plan():
     assert user.is_canceled() is False
 
     user.cancel(now=True)
+    time.sleep(2)
 
 
 def test_plan_returns_plan_name():
@@ -147,6 +157,7 @@ def test_plan_returns_plan_name():
     assert user.plan() == 'Masonite Test'
 
     assert user.cancel(now=True)
+    time.sleep(2)
 
 
 def test_is_on_trial_after_trial():
@@ -162,6 +173,7 @@ def test_is_on_trial_after_trial():
     assert user.on_trial() is False
 
     user.cancel(now=True)
+    time.sleep(2)
 
 
 def test_subscription_is_over():
@@ -183,3 +195,4 @@ def test_subscription_is_over():
     assert user.is_subscribed() is False
 
     user.cancel(now=True)
+    time.sleep(2)
