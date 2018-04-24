@@ -9,6 +9,8 @@ except ImportError:
 
 class Billable:
 
+    _processor = PROCESSOR
+
     def subscribe(self, processor_plan, token):
         """
         Subscribe user to a billing plan
@@ -24,7 +26,7 @@ class Billable:
         else:
             customer_id = None
 
-        subscription = PROCESSOR.subscribe(processor_plan, token, customer=customer_id)
+        subscription = self._processor.subscribe(processor_plan, token, customer=customer_id)
         self.plan_id = subscription['id']
         self.save()
 
@@ -38,7 +40,7 @@ class Billable:
         Put user on trial
         """
 
-        PROCESSOR.trial(days)
+        self._processor.trial(days)
         return self
 
     def on_trial(self, plan_id=None):
@@ -63,7 +65,7 @@ class Billable:
         """
         Cancel a subscription
         """
-        cancel = PROCESSOR.cancel(self.plan_id, now=now)
+        cancel = self._processor.cancel(self.plan_id, now=now)
 
         if cancel:
             if now:
@@ -89,7 +91,7 @@ class Billable:
         return None
 
     def create_customer(self, description, token):
-        customer = PROCESSOR._create_customer(description, token)
+        customer = self._processor._create_customer(description, token)
         self.customer_id = customer['id']
         self.save()
         return self.customer_id
@@ -114,7 +116,7 @@ class Billable:
         if not kwargs.get('description'):
             kwargs.update({'description': 'Charge For {0}'.format(self.email)})
         
-        return PROCESSOR.charge(amount, **kwargs)
+        return self._processor.charge(amount, **kwargs)
 
     """ Checking Subscription Status """
 
@@ -178,7 +180,7 @@ class Billable:
         """
         trial_ends_at = None
         ends_at = None
-        swapped_subscription  = PROCESSOR.swap(self.plan_id, new_plan, **kwargs)
+        swapped_subscription  = self._processor.swap(self.plan_id, new_plan, **kwargs)
 
         if swapped_subscription['trial_end']:
             trial_ends_at = pendulum.from_timestamp(swapped_subscription['trial_end'])
@@ -198,7 +200,7 @@ class Billable:
         """
         Skip any trial that the plan may have and charge the user
         """
-        PROCESSOR.skip_trial()
+        self._processor.skip_trial()
         return self
     
     def prorate(self, bool):
@@ -212,7 +214,7 @@ class Billable:
         """
         Resume a trial
         """
-        plan = PROCESSOR.resume(self.plan_id)
+        plan = self._processor.resume(self.plan_id)
         subscription = self._get_subscription()
         subscription.ends_at = None
         subscription.save()
@@ -223,7 +225,7 @@ class Billable:
         """
         Change the card or token
         """
-        return PROCESSOR.card(self.customer_id, token)
+        return self._processor.card(self.customer_id, token)
     
     def _get_subscription(self):
         return Subscription.where('user_id', self.id).first()
