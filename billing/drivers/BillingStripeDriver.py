@@ -97,7 +97,7 @@ class BillingStripeDriver:
 
         charge = stripe.Charge.create(
             amount=amount,
-            **kwargs,
+            **kwargs
         )
 
         if charge['status'] == 'succeeded':
@@ -153,7 +153,7 @@ class BillingStripeDriver:
 
         subscription = stripe.Subscription.create(
             customer=customer,
-            **kwargs,  
+            **kwargs
         )
         self._subscription_args = {}
         return subscription
