@@ -11,6 +11,7 @@ setup(
         'billing.managers',
         'billing.models',
         'billing.snippets',
+        'billing.controllers',
     ],
     install_requires=[
         'masonite',
