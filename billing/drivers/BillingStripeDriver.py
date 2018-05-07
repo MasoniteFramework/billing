@@ -30,7 +30,7 @@ class BillingStripeDriver:
                 raise PlanNotFound('The {0} plan was not found in Stripe'.format(plan))
             if 'No such customer' in str(e):
                 return False
-        
+
         return None
 
     def trial(self, days=0):
@@ -41,15 +41,15 @@ class BillingStripeDriver:
         try:
             if plan_id:
                 subscription = self._get_subscription(plan_id)
-                
+
                 if subscription['status'] == 'trialing':
                     return True
                 return False
-            
+
         except InvalidRequestError:
             return False
         return None
-        
+
     def is_subscribed(self, plan_id, plan_name=None):
         try:
             # get the plan
@@ -57,15 +57,15 @@ class BillingStripeDriver:
             if not plan_name:
                 if subscription['status'] in ('active', 'trialing'):
                     return True
-            
+
             if subscription["items"]["data"][0]['plan']['id'] == plan_name:
                 return True
 
         except InvalidRequestError:
             return False
-        
+
         return False
-    
+
     def is_canceled(self, plan_id):
         try:
             # get the plan
@@ -74,9 +74,9 @@ class BillingStripeDriver:
                 return True
         except InvalidRequestError:
             return False
-        
+
         return False
-    
+
     def cancel(self, plan_id, now=False):
         subscription = stripe.Subscription.retrieve(plan_id)
 
@@ -85,12 +85,12 @@ class BillingStripeDriver:
         return False
 
     def create_customer(self, description, token):
-        return self._create_customer('test-customer', 'tok_amex')
+        return self._create_customer(description, token)
 
     def skip_trial(self):
         self._subscription_args.update({'trial_end': 'now'})
         return self
-    
+
     def charge(self, amount, **kwargs):
         if not kwargs.get('currency'):
             kwargs.update({'currency': billing.DRIVERS['stripe']['currency']})
@@ -104,7 +104,7 @@ class BillingStripeDriver:
             return True
         else:
             return False
-        
+
     def card(self, customer_id, token):
         stripe.Customer.modify(customer_id,
             source=token,
@@ -132,7 +132,7 @@ class BillingStripeDriver:
         }]
         )
         return True
-    
+
     def plan(self, plan_id):
         subscription = self._get_subscription(plan_id)
         return subscription['plan']['name']
@@ -143,7 +143,7 @@ class BillingStripeDriver:
             description=description,
             source=token # obtained with Stripe.js
         )
-    
+
     def _create_subscription(self, customer, **kwargs):
         if not isinstance(customer, str):
             customer = customer['id']
@@ -157,6 +157,6 @@ class BillingStripeDriver:
         )
         self._subscription_args = {}
         return subscription
-    
-    def _get_subscription(self, plan_id):  
+
+    def _get_subscription(self, plan_id):
         return stripe.Subscription.retrieve(plan_id)
