@@ -1,2 +1,2 @@
 pytest
-stripe
+python-dotenv

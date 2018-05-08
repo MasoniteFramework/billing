@@ -6,8 +6,9 @@ CREATE DATABASE IF NOT EXISTS `demo` DEFAULT CHARACTER SET utf8 COLLATE utf8_gen
 USE `demo`;
 # Create Table
 CREATE TABLE IF NOT EXISTS `subscriptions` (
+  `id` int(11) NOT NULL PRIMARY KEY,
   `user_id` int(11) NOT NULL,
-  `plan` varchar(50) DEFAULT NULL,
+  `plan` varchar(255) DEFAULT NULL,
   `plan_id` varchar(50) DEFAULT NULL,
   `plan_name` varchar(150) DEFAULT NULL,
   `trial_ends_at` timestamp NULL DEFAULT NULL,
