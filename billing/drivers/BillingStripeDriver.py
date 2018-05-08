@@ -9,6 +9,7 @@ try:
 except ImportError:
     raise ImportError('Billing configuration found')
 
+
 class BillingStripeDriver:
 
     _subscription_args = {}
@@ -32,6 +33,10 @@ class BillingStripeDriver:
                 return False
 
         return None
+
+    def coupon(self, coupon_id):
+        self._subscription_args.update({'coupon': coupon_id})
+        return self
 
     def trial(self, days=0):
         self._subscription_args.update({'trial_period_days': days})
