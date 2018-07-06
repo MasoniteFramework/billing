@@ -244,7 +244,7 @@ class Billable:
         if subscription:
             subscription.plan = processor_plan
             subscription.plan_id = subscription_object['id']
-            subscription.plan_name = subscription_object['plan']['id']
+            subscription.plan_name = subscription_object['plan']['name']
             subscription.trial_ends_at = trial_ends_at
             subscription.ends_at = ends_at
             subscription.save()
@@ -255,7 +255,7 @@ class Billable:
                 user_id = self.id,
                 plan = processor_plan,
                 plan_id = subscription_object['id'],
-                plan_name = subscription_object['plan']['name'],
+                plan_name = subscription_object['plan']['id'],
                 trial_ends_at = trial_ends_at,
                 ends_at = ends_at,
             )
