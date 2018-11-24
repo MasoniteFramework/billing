@@ -21,14 +21,15 @@ class BillingStripeDriver:
 
         try:
             subscription = self._create_subscription(customer,
-                plan=plan,
-                **kwargs
-            )
+                                                     plan=plan,
+                                                     **kwargs
+                                                     )
             return subscription
 
         except InvalidRequestError as e:
             if 'No such plan' in str(e):
-                raise PlanNotFound('The {0} plan was not found in Stripe'.format(plan))
+                raise PlanNotFound(
+                    'The {0} plan was not found in Stripe'.format(plan))
             if 'No such customer' in str(e):
                 return False
 
@@ -36,6 +37,7 @@ class BillingStripeDriver:
 
     def coupon(self, coupon_id):
         self._subscription_args.update({'coupon': coupon_id})
+
         return self
 
     def trial(self, days=0):
@@ -85,7 +87,7 @@ class BillingStripeDriver:
     def cancel(self, plan_id, now=False):
         subscription = stripe.Subscription.retrieve(plan_id)
 
-        if subscription.delete(at_period_end= not now):
+        if subscription.delete(at_period_end=not now):
             return subscription
         return False
 
@@ -100,6 +102,8 @@ class BillingStripeDriver:
         if not kwargs.get('currency'):
             kwargs.update({'currency': billing.DRIVERS['stripe']['currency']})
 
+        amount = self._apply_coupon(amount)
+
         charge = stripe.Charge.create(
             amount=amount,
             **kwargs
@@ -112,41 +116,56 @@ class BillingStripeDriver:
 
     def card(self, customer_id, token):
         stripe.Customer.modify(customer_id,
-            source=token,
-        )
+                               source=token,
+                               )
 
         return True
 
     def swap(self, plan, new_plan, **kwargs):
         subscription = stripe.Subscription.retrieve(plan)
         subscription = stripe.Subscription.modify(plan,
-        cancel_at_period_end=False,
-        items=[{
-            'id': subscription['items']['data'][0].id,
-            'plan': new_plan,
-        }]
-        )
+                                                  cancel_at_period_end=False,
+                                                  items=[{
+                                                      'id': subscription['items']['data'][0].id,
+                                                      'plan': new_plan,
+                                                  }]
+                                                  )
         return subscription
 
     def resume(self, plan_id):
         subscription = stripe.Subscription.retrieve(plan_id)
         stripe.Subscription.modify(plan_id,
-        cancel_at_period_end = False,
-        items=[{
-            'id': subscription['items']['data'][0].id
-        }]
-        )
+                                   cancel_at_period_end=False,
+                                   items=[{
+                                       'id': subscription['items']['data'][0].id
+                                   }]
+                                   )
         return True
 
     def plan(self, plan_id):
         subscription = self._get_subscription(plan_id)
         return subscription['plan']['name']
 
+    def _apply_coupon(self, amount):
+        if 'coupon' in self._subscription_args:
+            if type(self._subscription_args['coupon']) == str:
+                coupon = stripe.Coupon.retrieve(
+                    self._subscription_args['coupon'])
+                if coupon['percent_off']:
+                    return abs((amount * (coupon['percent_off'] / 100)) - amount)
+
+                return amount - coupon['amount_off']
+            elif type(self._subscription_args['coupon']) == int:
+                return amount - self._subscription_args['coupon']
+            elif type(self._subscription_args['coupon']) == float:
+                return abs((amount * (self._subscription_args['coupon'])) - amount)
+
+        return amount
 
     def _create_customer(self, description, token):
         return stripe.Customer.create(
             description=description,
-            source=token # obtained with Stripe.js
+            source=token  # obtained with Stripe.js
         )
 
     def _create_subscription(self, customer, **kwargs):
