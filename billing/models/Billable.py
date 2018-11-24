@@ -7,6 +7,7 @@ try:
 except ImportError:
     raise ImportError('No configuration file found')
 
+
 class Billable:
 
     _processor = PROCESSOR
@@ -17,7 +18,7 @@ class Billable:
         """
         if not self.customer_id:
             self.create_customer('Customer {0}'.format(self.email), token)
-        
+
         if self.is_subscribed(processor_plan):
             return True
 
@@ -34,7 +35,14 @@ class Billable:
         self._save_subscription_model(processor_plan, subscription)
 
         return True
-    
+
+    def coupon(self, coupon_id):
+        """
+        Add coupon to subscription
+        """
+        self._processor.coupon(coupon_id)
+        return self
+
     def trial(self, days=False):
         """
         Put user on trial
@@ -51,14 +59,14 @@ class Billable:
 
         if not subscription:
             return False
-        
+
         if not plan_id:
             if subscription.trial_ends_at and subscription.trial_ends_at.is_future():
                 return True
-        
+
         if subscription.plan == plan_id and subscription.trial_ends_at and subscription.trial_ends_at.is_future():
             return True
-        
+
         return False
 
     def cancel(self, now=False):
@@ -82,12 +90,12 @@ class Billable:
                 subscription.save()
                 return True
         return False
-    
+
     def plan(self):
         subscription = self._get_subscription()
         if subscription:
             return subscription.plan_name
-        
+
         return None
 
     def create_customer(self, description, token):
@@ -95,7 +103,7 @@ class Billable:
         self.customer_id = customer['id']
         self.save()
         return self.customer_id
-    
+
     def quantity(self, quantity):
         """
         Set a quantity amount for a subscription
@@ -112,10 +120,10 @@ class Billable:
         else:
             kwargs.update({'source': kwargs.get('token')})
             del kwargs['token']
-        
+
         if not kwargs.get('description'):
             kwargs.update({'description': 'Charge For {0}'.format(self.email)})
-        
+
         return self._processor.charge(amount, **kwargs)
 
     """ Checking Subscription Status """
@@ -126,7 +134,7 @@ class Billable:
         TODO
         """
         pass
-    
+
     def is_subscribed(self, plan_name=None):
         """
         Check if a user is subscribed
@@ -137,9 +145,9 @@ class Billable:
             # If the subscription does not expire OR the subscription ends at a time in the future
             if not self._get_subscription().ends_at or ( self._get_subscription().ends_at and self._get_subscription().ends_at.is_future()):
                 # If the plan name equals the plan name specified
-                if plan_name and self._get_subscription().plan == plan_name: 
+                if plan_name and self._get_subscription().plan == plan_name:
                     return True
-                
+
                 # if the plan name was left out
                 if not plan_name:
                     return True
@@ -155,7 +163,7 @@ class Billable:
             elif not plan:
                 return True
 
-        
+
         return False
 
     def is_canceled(self):
@@ -184,7 +192,7 @@ class Billable:
 
         if swapped_subscription['trial_end']:
             trial_ends_at = pendulum.from_timestamp(swapped_subscription['trial_end'])
-        
+
         if swapped_subscription['current_period_end']:
             ends_at = pendulum.from_timestamp(swapped_subscription['current_period_end'])
 
@@ -194,22 +202,22 @@ class Billable:
         subscription.trial_ends_at = trial_ends_at
         subscription.ends_at = ends_at
         return subscription.save()
-        
-    
+
+
     def skip_trial(self):
         """
         Skip any trial that the plan may have and charge the user
         """
         self._processor.skip_trial()
         return self
-    
+
     def prorate(self, bool):
         """
         Whether the user should be prorated or not
         TODO: should be only parameters
         """
         pass
-    
+
     def resume(self):
         """
         Resume a trial
@@ -220,23 +228,23 @@ class Billable:
         subscription.save()
         return plan
 
-    
+
     def card(self, token):
         """
         Change the card or token
         """
         return self._processor.card(self.customer_id, token)
-    
+
     def _get_subscription(self):
         return Subscription.where('user_id', self.id).first()
-    
-    def _save_subscription_model(self, processor_plan, subscription_object): 
+
+    def _save_subscription_model(self, processor_plan, subscription_object):
 
         trial_ends_at = None
         ends_at = None
         if subscription_object['trial_end']:
             trial_ends_at = pendulum.from_timestamp(subscription_object['trial_end'])
-        
+
         if subscription_object['ended_at']:
             ends_at = pendulum.from_timestamp(subscription_object['ended_at'])
 
