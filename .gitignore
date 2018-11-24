@@ -3,4 +3,6 @@ masonite_billing.egg-info
 .vscode
 .cache
 .env
+dist
+.pytest_cache
 **.pyc
