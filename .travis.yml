@@ -9,7 +9,7 @@ services:
 - mysql
 
 before_install:
-- mysql -u root --password="" < tests/travis.sql
+- orator migrate -p tests/migrations -c config/database.py
 - pip install -r requirements.txt
 - pip install -e .
 
