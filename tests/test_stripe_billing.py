@@ -19,6 +19,7 @@ class User(Billable):
         pass
 
 user = User()
+user.email = "test@email.com"
 
 if os.environ.get('STRIPE_CUSTOMER'):
     user.customer_id = os.getenv('STRIPE_CUSTOMER')
@@ -222,3 +223,21 @@ def test_subscription_is_over():
     user.cancel(now=True)
     if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         time.sleep(2)
+
+def test_can_use_coupon_on_charge():
+    assert user._processor._apply_coupon(1000) == 1000
+    assert user.coupon('5-off')._processor._apply_coupon(500) == 400
+    assert user.coupon('10-percent-off')._processor._apply_coupon(1000) == 900
+    assert user.coupon('10-percent-off')._processor._apply_coupon(1499) == 1349.1
+    assert user.coupon(.10)._processor._apply_coupon(1499) == 1349.1
+    assert user.coupon(100)._processor._apply_coupon(1000) == 900
+
+
+def test_can_use_coupon_on_subscription():
+    user.skip_trial().coupon('5-off').subscribe('masonite-test', 'tok_amex')
+    assert user.is_subscribed() is True
+    assert user.on_trial() is False
+    subscription = user._get_subscription()
+
+    user.cancel(now=True)
+

@@ -9,6 +9,7 @@ try:
 except ImportError:
     raise ImportError('Billing configuration found')
 
+
 class BillingStripeDriver:
 
     _subscription_args = {}
@@ -20,18 +21,24 @@ class BillingStripeDriver:
 
         try:
             subscription = self._create_subscription(customer,
-                plan=plan,
-                **kwargs
-            )
+                                                     plan=plan,
+                                                     **kwargs
+                                                     )
             return subscription
 
         except InvalidRequestError as e:
             if 'No such plan' in str(e):
-                raise PlanNotFound('The {0} plan was not found in Stripe'.format(plan))
+                raise PlanNotFound(
+                    'The {0} plan was not found in Stripe'.format(plan))
             if 'No such customer' in str(e):
                 return False
-        
+
         return None
+
+    def coupon(self, coupon_id):
+        self._subscription_args.update({'coupon': coupon_id})
+
+        return self
 
     def trial(self, days=0):
         self._subscription_args.update({'trial_period_days': days})
@@ -41,15 +48,15 @@ class BillingStripeDriver:
         try:
             if plan_id:
                 subscription = self._get_subscription(plan_id)
-                
+
                 if subscription['status'] == 'trialing':
                     return True
                 return False
-            
+
         except InvalidRequestError:
             return False
         return None
-        
+
     def is_subscribed(self, plan_id, plan_name=None):
         try:
             # get the plan
@@ -57,15 +64,15 @@ class BillingStripeDriver:
             if not plan_name:
                 if subscription['status'] in ('active', 'trialing'):
                     return True
-            
+
             if subscription["items"]["data"][0]['plan']['id'] == plan_name:
                 return True
 
         except InvalidRequestError:
             return False
-        
+
         return False
-    
+
     def is_canceled(self, plan_id):
         try:
             # get the plan
@@ -74,26 +81,28 @@ class BillingStripeDriver:
                 return True
         except InvalidRequestError:
             return False
-        
+
         return False
-    
+
     def cancel(self, plan_id, now=False):
         subscription = stripe.Subscription.retrieve(plan_id)
 
-        if subscription.delete(at_period_end= not now):
+        if subscription.delete(at_period_end=not now):
             return subscription
         return False
 
     def create_customer(self, description, token):
-        return self._create_customer('test-customer', 'tok_amex')
+        return self._create_customer(description, token)
 
     def skip_trial(self):
         self._subscription_args.update({'trial_end': 'now'})
         return self
-    
+
     def charge(self, amount, **kwargs):
         if not kwargs.get('currency'):
             kwargs.update({'currency': billing.DRIVERS['stripe']['currency']})
+
+        amount = self._apply_coupon(amount)
 
         charge = stripe.Charge.create(
             amount=amount,
@@ -104,46 +113,61 @@ class BillingStripeDriver:
             return True
         else:
             return False
-        
+
     def card(self, customer_id, token):
         stripe.Customer.modify(customer_id,
-            source=token,
-        )
+                               source=token,
+                               )
 
         return True
 
     def swap(self, plan, new_plan, **kwargs):
         subscription = stripe.Subscription.retrieve(plan)
         subscription = stripe.Subscription.modify(plan,
-        cancel_at_period_end=False,
-        items=[{
-            'id': subscription['items']['data'][0].id,
-            'plan': new_plan,
-        }]
-        )
+                                                  cancel_at_period_end=False,
+                                                  items=[{
+                                                      'id': subscription['items']['data'][0].id,
+                                                      'plan': new_plan,
+                                                  }]
+                                                  )
         return subscription
 
     def resume(self, plan_id):
         subscription = stripe.Subscription.retrieve(plan_id)
         stripe.Subscription.modify(plan_id,
-        cancel_at_period_end = False,
-        items=[{
-            'id': subscription['items']['data'][0].id
-        }]
-        )
+                                   cancel_at_period_end=False,
+                                   items=[{
+                                       'id': subscription['items']['data'][0].id
+                                   }]
+                                   )
         return True
-    
+
     def plan(self, plan_id):
         subscription = self._get_subscription(plan_id)
         return subscription['plan']['name']
 
+    def _apply_coupon(self, amount):
+        if 'coupon' in self._subscription_args:
+            if type(self._subscription_args['coupon']) == str:
+                coupon = stripe.Coupon.retrieve(
+                    self._subscription_args['coupon'])
+                if coupon['percent_off']:
+                    return abs((amount * (coupon['percent_off'] / 100)) - amount)
+
+                return amount - coupon['amount_off']
+            elif type(self._subscription_args['coupon']) == int:
+                return amount - self._subscription_args['coupon']
+            elif type(self._subscription_args['coupon']) == float:
+                return abs((amount * (self._subscription_args['coupon'])) - amount)
+
+        return amount
 
     def _create_customer(self, description, token):
         return stripe.Customer.create(
             description=description,
-            source=token # obtained with Stripe.js
+            source=token  # obtained with Stripe.js
         )
-    
+
     def _create_subscription(self, customer, **kwargs):
         if not isinstance(customer, str):
             customer = customer['id']
@@ -157,6 +181,6 @@ class BillingStripeDriver:
         )
         self._subscription_args = {}
         return subscription
-    
-    def _get_subscription(self, plan_id):  
+
+    def _get_subscription(self, plan_id):
         return stripe.Subscription.retrieve(plan_id)
