@@ -9,8 +9,8 @@ services:
 - mysql
 
 before_install:
-- orator migrate -p tests/migrations -c config/database.py
 - pip install -r requirements.txt
+- orator migrate -p tests/migrations -c config/database.py
 - pip install -e .
 
 script: travis_retry pytest
