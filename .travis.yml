@@ -10,7 +10,7 @@ services:
 
 before_install:
 - pip install -r requirements.txt
-- orator migrate -p tests/migrations -c config/database.py
+- orator migrate -p tests/migrations -c config/database.py -f
 - pip install -e .
 
 script: travis_retry pytest
