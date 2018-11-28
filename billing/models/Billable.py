@@ -13,8 +13,14 @@ class Billable:
     _processor = PROCESSOR
 
     def subscribe(self, processor_plan, token):
-        """
-        Subscribe user to a billing plan
+        """Subscribe user to a billing plan
+        
+        Arguments:
+            processor_plan {string} -- The plan inside the processor (Stripe, Braintree etc)
+            token {string} -- The authentication token from a form submission
+        
+        Returns:
+            bool
         """
         if not self.customer_id:
             self.create_customer('Customer {0}'.format(self.email), token)
@@ -37,23 +43,40 @@ class Billable:
         return True
 
     def coupon(self, coupon_id):
-        """
-        Add coupon to subscription
+        """A coupon code, an integer or a float as a representation of the coupon.
+        
+        Arguments:
+            coupon_id {string|integer|float} -- The coupon identification.
+                - string - Lookup in the processor for the coupon information
+                - integer - deduct directly from the amount
+                - float - deduct the percentage amount
+        
+        Returns:
+            self
         """
         self._processor.coupon(coupon_id)
         return self
 
     def trial(self, days=False):
+        """Put user on trial.
+        
+        Keyword Arguments:
+            days {bool} -- Specify the days the user should be put on trial. (default: {False})
+        
+        Returns:
+            self
         """
-        Put user on trial
-        """
-
         self._processor.trial(days)
         return self
 
     def on_trial(self, plan_id=None):
-        """
-        Check if a user is on trial
+        """Check if a user is on trial.
+        
+        Keyword Arguments:
+            plan_id {string} -- The plan identifier (default: {None})
+        
+        Returns:
+            bool
         """
         subscription = self._get_subscription()
 
@@ -70,8 +93,13 @@ class Billable:
         return False
 
     def cancel(self, now=False):
-        """
-        Cancel a subscription
+        """Cancel a subscription.
+        
+        Keyword Arguments:
+            now {bool} -- Whether the user should be cancelled now or when the pay period ends. (default: {False})
+        
+        Returns:
+            bool -- Whether or not the user has been successfully cancelled.
         """
         cancel = self._processor.cancel(self.plan_id, now=now)
 
@@ -92,6 +120,11 @@ class Billable:
         return False
 
     def plan(self):
+        """Gets the users plan name.
+        
+        Returns:
+            string|None -- Returns the plan name or None of the plan does not exist.
+        """
         subscription = self._get_subscription()
         if subscription:
             return subscription.plan_name
@@ -99,22 +132,41 @@ class Billable:
         return None
 
     def create_customer(self, description, token):
+        """Creates a new customer.
+        
+        Arguments:
+            description {string} -- Description of the customer like email or ID.
+            token {string} -- The token gotten from a form submission. This is processor specific.
+        
+        Returns:
+            string -- Returns the customer id.
+        """
         customer = self._processor._create_customer(description, token)
         self.customer_id = customer['id']
         self.save()
         return self.customer_id
 
     def quantity(self, quantity):
-        """
-        Set a quantity amount for a subscription
+        """Set a quantity amount for a subscription.
+        
+        Arguments:
+            quantity {int}
+        
+        Returns:
+            self
         """
         self._quantity = quantity
+        return self
 
     def charge(self, amount, **kwargs):
+        """Charge a one time charge for a user.
+        
+        Arguments:
+            amount {int} -- The integer in cents.
+        
+        Returns:
+            processor.charge -- The processor charge method.
         """
-        Charge a one time charge for a user
-        """
-
         if not kwargs.get('token'):
             kwargs.update({'customer': self.customer_id})
         else:
@@ -126,20 +178,21 @@ class Billable:
 
         return self._processor.charge(amount, **kwargs)
 
-    """ Checking Subscription Status """
-
     def on_grace_period(self):
-        """
-        Check if a user is on a grace period
-        TODO
+        """Check if a user is on a grace period
         """
         pass
 
     def is_subscribed(self, plan_name=None):
+        """Check if a user is subscribed.
+        
+        Keyword Arguments:
+            plan_name {string} -- The plan name or None. If it is None this will check if the user is subscribed.
+                                    If a string exists it will check if a user is subscribed to that plan. (default: {None})
+        
+        Returns:
+            bool -- Whether the user is subscribed or not.
         """
-        Check if a user is subscribed
-        """
-
         # If the subscription exists
         if self._get_subscription():
             # If the subscription does not expire OR the subscription ends at a time in the future
@@ -155,6 +208,15 @@ class Billable:
         return False
 
     def was_subscribed(self, plan=None):
+        """Checks if the user was subscribed at one point but is no longer
+        
+        Keyword Arguments:
+            plan {string|None} -- The plan name or None. If it is None this will check if the user is subscribed.
+                                    If a string exists it will check if a user is subscribed to that plan. (default: {None})
+        
+        Returns:
+            bool -- Whether the user was subscribed at one point but is not currently subscribed.
+        """
         subscription = self._get_subscription()
 
         if subscription and subscription.ends_at and subscription.ends_at.is_past():
@@ -167,8 +229,10 @@ class Billable:
         return False
 
     def is_canceled(self):
-        """
-        Check if the user was subscribed but cancelled their subscription
+        """Check if the user was subscribed but cancelled their subscription. This is useful if the user is on a grace period.
+        
+        Returns:
+            bool
         """
         subscription = self._get_subscription()
 
@@ -180,11 +244,14 @@ class Billable:
 
         return False
 
-    """ Upgrading and changing a plan """
-
     def swap(self, new_plan, **kwargs):
-        """
-        Change the current plan
+        """Change the current plan to a new plan.
+        
+        Arguments:
+            new_plan {string} -- The new plan to swap to.
+        
+        Returns:
+            bool   
         """
         trial_ends_at = None
         ends_at = None
@@ -205,8 +272,10 @@ class Billable:
 
 
     def skip_trial(self):
-        """
-        Skip any trial that the plan may have and charge the user
+        """Skip any trial that the plan may have and charge the user.
+        
+        Returns:
+            self
         """
         self._processor.skip_trial()
         return self
@@ -219,8 +288,10 @@ class Billable:
         pass
 
     def resume(self):
-        """
-        Resume a trial
+        """Resume a cancelled subscription
+        
+        Returns:
+            processor.resume -- Returns the processor resume method.
         """
         plan = self._processor.resume(self.plan_id)
         subscription = self._get_subscription()
@@ -230,16 +301,34 @@ class Billable:
 
 
     def card(self, token):
-        """
-        Change the card or token
+        """Change the card or token used to charge the user.
+        
+        Arguments:
+            token {string} -- The processor authentication token. Usually submitted from a form.
+        
+        Returns:
+            processor.card -- Returns the processor card method.
         """
         return self._processor.card(self.customer_id, token)
 
     def _get_subscription(self):
+        """Gets the subscription from the subcriptions table.
+        
+        Returns:
+            billing.models.Subscription - The billing subscription model.
+        """
         return Subscription.where('user_id', self.id).first()
 
     def _save_subscription_model(self, processor_plan, subscription_object):
-
+        """Saves the plan to the subscription model
+        
+        Arguments:
+            processor_plan {string} -- The plan name.
+            subscription_object {billing.models.Subscription} -- The billing subscription model.
+        
+        Returns:
+            billing.models.Subscription -- The billing subscription model.
+        """
         trial_ends_at = None
         ends_at = None
         if subscription_object['trial_end']:
