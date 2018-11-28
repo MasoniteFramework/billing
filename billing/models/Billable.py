@@ -1,3 +1,5 @@
+""" The Billing Model """
+
 import pendulum
 
 from billing.managers.BillingManager import BillingManager
@@ -16,7 +18,7 @@ class Billable:
     _processor = PROCESSOR
 
     def subscribe(self, processor_plan, token):
-        """Subscribe user to a billing plan
+        """Subscribe user to a billing plan.
 
         Arguments:
             processor_plan {string} -- The plan inside the processor (Stripe, Braintree etc)
