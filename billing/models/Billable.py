@@ -2,13 +2,13 @@
 
 import pendulum
 
-from billing.managers.BillingManager import BillingManager
+from billing.factories import BillingFactory
 
 from .Subscription import Subscription
 
 try:
     from config import billing
-    PROCESSOR = BillingManager().create_driver(billing.DRIVER)
+    PROCESSOR = BillingFactory.make(billing.DRIVER)
 except ImportError:
     raise ImportError('No configuration file found')
 

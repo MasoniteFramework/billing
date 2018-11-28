@@ -3,15 +3,14 @@ import pytest
 import time
 
 from dotenv import find_dotenv, load_dotenv
-from billing.models.Billable import Billable
+from billing.models import Billable, Subscription
 from billing.exceptions import PlanNotFound
 from masonite.app import App
-from billing.models.Subscription import Subscription
 import pendulum
 
 load_dotenv(find_dotenv())
 
-
+print(Subscription)
 class User(Billable):
     plan_id = None
     id = 1

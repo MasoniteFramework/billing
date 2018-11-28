@@ -1,13 +1,16 @@
 ''' Masonite Billing Controller For Webhooks '''
 
-from ..models.Subscription import Subscription
-from app.User import User
+from billing.models import Subscription
+from config import auth
 import pendulum
+
 
 class WebhookController:
     """
     Add webhooks to tie into stripe events
     """
+
+    model = auth.AUTH['model']
 
     def handle(self, Request):
         """
@@ -29,7 +32,7 @@ class WebhookController:
         Event for subscription has ended
         """
         subscription_info = payload['data']['object']
-        user = User.where('customer_id', subscription_info['customer']).first()
+        user = self.model.where('customer_id', subscription_info['customer']).first()
 
         if user:
             subscription = Subscription.where(
