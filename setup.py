@@ -3,15 +3,16 @@ from setuptools import setup
 
 setup(
     name="masonite-billing",
-    version='0.1.4',
+    version='0.1.5',
     packages=[
         'billing',
         'billing.commands',
+        'billing.contracts',
+        'billing.controllers',
         'billing.drivers',
-        'billing.managers',
+        'billing.factories',
         'billing.models',
         'billing.snippets',
-        'billing.controllers',
     ],
     install_requires=[
         'masonite',
