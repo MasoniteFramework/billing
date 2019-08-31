@@ -3,6 +3,7 @@
 from billing.models import Subscription
 from config import auth
 import pendulum
+from masonite.request import Request
 
 
 class WebhookController:
@@ -12,18 +13,17 @@ class WebhookController:
 
     model = auth.AUTH['model']
 
-    def handle(self, Request):
+    def handle(self, request: Request):
         """
         Entry Point for all webhooks
         """
 
         # Turn the hook into a method call
-        payload = Request.input('payload')
-        handler = payload['type'].split('.')
+        handler = request.input('type').split('.')
         handler = 'handle_' + '_'.join(handler)
 
         if hasattr(self, handler):
-            return getattr(self, handler)(payload)
+            return getattr(self, handler)(request.all())
 
         return 'Webhook Not Supported'
     
@@ -43,5 +43,5 @@ class WebhookController:
                 subscription.save()
                 return 'Webhook Handled'
 
-        return 'Webhook Error'
+        return 'User or Subscription does not exist'
 

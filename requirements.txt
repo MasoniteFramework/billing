@@ -1,3 +1,6 @@
 pytest
 python-dotenv
 orator
+masonite>=2.2
+cleo
+stripe
