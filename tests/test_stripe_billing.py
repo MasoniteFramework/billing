@@ -10,7 +10,6 @@ import pendulum
 
 load_dotenv(find_dotenv())
 
-print(Subscription)
 class User(Billable):
     plan_id = None
     id = 1

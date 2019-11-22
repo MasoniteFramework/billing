@@ -339,8 +339,6 @@ class Billable:
         """
         trial_ends_at = None
         ends_at = None
-        print('sub obj', subscription_object)
-        print('the args are', self._processor._subscription_args)
         
         if subscription_object['plan']['trial_period_days']:
             trial_ends_at = pendulum.now().add(
