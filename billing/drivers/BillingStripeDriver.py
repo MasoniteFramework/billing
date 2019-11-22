@@ -161,8 +161,16 @@ class BillingStripeDriver:
             False|stripe.subscription.retrieve
         """
         subscription = stripe.Subscription.retrieve(plan_id)
+        
+        if now:
+            canceled = subscription.delete()
+        else:
+            subscription.cancel_at_period_end = True
+            subscription.save()
+            canceled = subscription
 
-        if subscription.delete(at_period_end=not now):
+        
+        if canceled:
             return subscription
         return False
 
@@ -186,7 +194,7 @@ class BillingStripeDriver:
         Returns:
             self
         """
-        self._subscription_args.update({'trial_end': 'now'})
+        self._subscription_args.update({'trial_period_days': 0})
         return self
 
     def charge(self, amount, **kwargs):
@@ -241,7 +249,7 @@ class BillingStripeDriver:
         """
         subscription = stripe.Subscription.retrieve(plan)
         subscription = stripe.Subscription.modify(plan,
-                                                  cancel_at_period_end=False,
+                                                  cancel_at_period_end=True,
                                                   items=[{
                                                       'id': subscription['items']['data'][0].id,
                                                       'plan': new_plan,
@@ -277,7 +285,8 @@ class BillingStripeDriver:
             string -- Returns the plan name.
         """
         subscription = self._get_subscription(plan_id)
-        return subscription['plan']['name']
+        product = stripe.Product.retrieve(subscription['plan']['product'])
+        return product['name']
 
     def _apply_coupon(self, amount):
         """Applies the coupon code to the subscription.
@@ -335,9 +344,10 @@ class BillingStripeDriver:
 
         for key, value in self._subscription_args.items():
             kwargs[key] = value
-
+        
         subscription = stripe.Subscription.create(
             customer=customer,
+            cancel_at_period_end=True,
             **kwargs
         )
         self._subscription_args = {}

@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="masonite-billing",
-    version='2.2.1',
+    version='3.0.0b2',
     packages=[
         'billing',
         'billing.commands',
@@ -17,7 +17,7 @@ setup(
     install_requires=[
         'masonite>=2.2',
         'cleo',
-        'stripe',
+        'stripe==2.40.0',
     ],
     include_package_data=True,
 )

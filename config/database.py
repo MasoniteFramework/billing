@@ -4,6 +4,7 @@ import os
 
 from dotenv import find_dotenv, load_dotenv
 from orator import DatabaseManager, Model
+from masonite import env
 
 '''
 |--------------------------------------------------------------------------
@@ -29,10 +30,16 @@ load_dotenv(find_dotenv())
 '''
 
 DATABASES = {
-    'default': {
-        'driver': 'sqlite',
-        'database': 'sqlite.db',
-    }
+    'default': 'mysql',
+    'mysql': {
+        'driver': 'mysql',
+        'host': env('DB_HOST'),
+        'database': env('DB_DATABASE'),
+        'port': env('DB_PORT'),
+        'user': env('DB_USERNAME'),
+        'password': env('DB_PASSWORD'),
+        'log_queries': env('DB_LOG'),
+    },
 }
 
 DB = DatabaseManager(DATABASES)

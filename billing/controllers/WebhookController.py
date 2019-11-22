@@ -4,6 +4,7 @@ from billing.models import Subscription
 from config import auth
 import pendulum
 from masonite.request import Request
+from masonite.helpers import config
 
 
 class WebhookController:
@@ -11,7 +12,7 @@ class WebhookController:
     Add webhooks to tie into stripe events
     """
 
-    model = auth.AUTH['model']
+    model = config('auth.guards.web.model')
 
     def handle(self, request: Request):
         """

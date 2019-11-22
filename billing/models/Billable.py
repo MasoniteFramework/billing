@@ -40,6 +40,7 @@ class Billable:
 
         subscription = self._processor.subscribe(
             processor_plan, token, customer=customer_id)
+        
         self.plan_id = subscription['id']
         self.save()
 
@@ -264,9 +265,9 @@ class Billable:
         swapped_subscription = self._processor.swap(
             self.plan_id, new_plan, **kwargs)
 
-        if swapped_subscription['trial_end']:
+        if swapped_subscription['plan']['trial_end']:
             trial_ends_at = pendulum.from_timestamp(
-                swapped_subscription['trial_end'])
+                swapped_subscription['plan']['trial_end'])
 
         if swapped_subscription['current_period_end']:
             ends_at = pendulum.from_timestamp(
@@ -274,7 +275,7 @@ class Billable:
 
         subscription = self._get_subscription()
         subscription.plan = swapped_subscription['plan']['id']
-        subscription.plan_name = swapped_subscription['plan']['name']
+        subscription.plan_name = swapped_subscription['plan']['id']
         subscription.trial_ends_at = trial_ends_at
         subscription.ends_at = ends_at
         return subscription.save()
@@ -338,29 +339,33 @@ class Billable:
         """
         trial_ends_at = None
         ends_at = None
-        if subscription_object['trial_end']:
-            trial_ends_at = pendulum.from_timestamp(
-                subscription_object['trial_end'])
+        print('sub obj', subscription_object)
+        print('the args are', self._processor._subscription_args)
+        
+        if subscription_object['plan']['trial_period_days']:
+            trial_ends_at = pendulum.now().add(
+                days=subscription_object['plan']['trial_period_days'])
 
         if subscription_object['ended_at']:
             ends_at = pendulum.from_timestamp(subscription_object['ended_at'])
 
         subscription = Subscription.where('user_id', self.id).first()
+        # product = self._processor.resubscription_object['plan']['product']
         if subscription:
             subscription.plan = processor_plan
             subscription.plan_id = subscription_object['id']
-            subscription.plan_name = subscription_object['plan']['name']
+            subscription.plan_name = self._processor.plan(
+                subscription_object['id'])
             subscription.trial_ends_at = trial_ends_at
             subscription.ends_at = ends_at
             subscription.save()
         else:
             # Create a new plan
-
             subscription = Subscription.create(
                 user_id=self.id,
                 plan=processor_plan,
                 plan_id=subscription_object['id'],
-                plan_name=subscription_object['plan']['id'],
+                plan_name=self._processor.plan(subscription_object['id']),
                 trial_ends_at=trial_ends_at,
                 ends_at=ends_at,
             )
