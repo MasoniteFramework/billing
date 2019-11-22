@@ -243,9 +243,9 @@ class Billable:
         """
         subscription = self._get_subscription()
 
-        if subscription.ends_at and subscription.ends_at.is_future():
+        if subscription and subscription.ends_at and subscription.ends_at.is_future():
             return True
-            
+
         if not subscription:
             return False
 
