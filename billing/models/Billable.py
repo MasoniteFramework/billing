@@ -243,6 +243,9 @@ class Billable:
         """
         subscription = self._get_subscription()
 
+        if subscription.ends_at and subscription.ends_at.is_future():
+            return True
+            
         if not subscription:
             return False
 
@@ -265,13 +268,13 @@ class Billable:
         swapped_subscription = self._processor.swap(
             self.plan_id, new_plan, **kwargs)
 
-        if swapped_subscription['plan']['trial_end']:
-            trial_ends_at = pendulum.from_timestamp(
-                swapped_subscription['plan']['trial_end'])
+        # if swapped_subscription['plan']['trial_end']:
+        #     trial_ends_at = pendulum.from_timestamp(
+        #         swapped_subscription['plan']['trial_end'])
 
-        if swapped_subscription['current_period_end']:
-            ends_at = pendulum.from_timestamp(
-                swapped_subscription['current_period_end'])
+        # if swapped_subscription['current_period_end']:
+        #     ends_at = pendulum.from_timestamp(
+        #         swapped_subscription['current_period_end'])
 
         subscription = self._get_subscription()
         subscription.plan = swapped_subscription['plan']['id']
