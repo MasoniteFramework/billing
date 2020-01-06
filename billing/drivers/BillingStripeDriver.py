@@ -347,7 +347,7 @@ class BillingStripeDriver:
         
         subscription = stripe.Subscription.create(
             customer=customer,
-            cancel_at_period_end=True,
+            cancel_at_period_end=False,
             **kwargs
         )
         self._subscription_args = {}
