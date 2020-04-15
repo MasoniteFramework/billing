@@ -44,6 +44,7 @@ def test_is_subscribed():
 
     assert user.is_subscribed() is True
     assert user.is_subscribed('masonite-test') is True
+    assert user.is_canceled() is False
     assert user.cancel(now=True)
     if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         time.sleep(2)
