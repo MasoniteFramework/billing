@@ -344,7 +344,7 @@ class BillingStripeDriver:
         """
         return stripe.Customer.create(
             description=description,
-            source=token # obtained with Stripe.js
+            source=token  # obtained with Stripe.js
         )
 
     def _create_subscription(self, customer, **kwargs):
