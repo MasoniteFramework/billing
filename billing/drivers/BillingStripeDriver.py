@@ -332,7 +332,7 @@ class BillingStripeDriver:
 
         return amount
 
-    def _create_customer(self, description, token, **kwargs):
+    def _create_customer(self, description, token):
         """Creates the customer in Stripe.
 
         Arguments:
@@ -344,8 +344,7 @@ class BillingStripeDriver:
         """
         return stripe.Customer.create(
             description=description,
-            source=token,  # obtained with Stripe.js
-            **kwargs
+            source=token # obtained with Stripe.js
         )
 
     def _create_subscription(self, customer, **kwargs):
