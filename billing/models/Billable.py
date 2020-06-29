@@ -321,6 +321,17 @@ class Billable:
             processor.card -- Returns the processor card method.
         """
         return self._processor.card(self.customer_id, token)
+    
+    def referral(self, code):
+        """Add or change referral code on stripe customer
+
+        Arguments:
+            code {string} -- The processor referral code. Usually submitted from a form.
+
+        Returns:
+            processor.referral -- Returns the processor referral method.
+        """
+        return self._processor.referral(self.customer_id, code)
 
     def _get_subscription(self):
         """Gets the subscription from the subcriptions table.

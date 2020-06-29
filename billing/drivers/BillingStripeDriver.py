@@ -236,6 +236,23 @@ class BillingStripeDriver:
                                )
 
         return True
+    
+    def referral(self, customer_id, code):
+        """Updates the referral code on file with the user.
+
+        Arguments:
+            customer_id {string} -- The Stripe customer identifier. 
+            code {string} -- The referral code from the form submission.
+
+        Returns:
+            True
+        """
+
+        stripe.Customer.modify(customer_id,
+                        metadata={"referral": code},
+                        )
+
+        return True
 
     def swap(self, plan, new_plan, **kwargs):
         """Swaps the old plan for a new plan.
@@ -315,7 +332,7 @@ class BillingStripeDriver:
 
         return amount
 
-    def _create_customer(self, description, token):
+    def _create_customer(self, description, token, **kwargs):
         """Creates the customer in Stripe.
 
         Arguments:
@@ -327,7 +344,8 @@ class BillingStripeDriver:
         """
         return stripe.Customer.create(
             description=description,
-            source=token  # obtained with Stripe.js
+            source=token,  # obtained with Stripe.js
+            **kwargs
         )
 
     def _create_subscription(self, customer, **kwargs):
