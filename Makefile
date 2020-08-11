@@ -5,6 +5,7 @@ init:
 	pip install -r requirements.txt
 	pip install pytest
 test:
+	orator migrate -p tests/migrations -c config/database.py -f
 	python -m pytest tests
 ci:
 	make test
