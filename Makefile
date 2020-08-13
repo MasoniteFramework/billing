@@ -11,11 +11,11 @@ ci:
 	make test
 	make lint
 lint:
-	python -m flake8 src/billing/ --ignore=E501,F401,E128,E402,E731,F821,E712,W503
+	python -m flake8 billing/ --ignore=E501,F401,E128,E402,E731,F821,E712,W503
 format:
-	black src/billing
+	black billing
 coverage:
-	python -m pytest --cov-report term --cov-report xml --cov=src/billing tests/
+	python -m pytest --cov-report term --cov-report xml --cov=billing tests/
 	python -m coveralls
 publish:
 	pip install 'twine>=1.5.0'
