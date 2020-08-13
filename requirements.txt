@@ -4,3 +4,4 @@ orator
 masonite>=2.2
 cleo
 stripe
+flake8
