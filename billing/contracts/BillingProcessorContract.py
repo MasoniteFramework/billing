@@ -2,7 +2,6 @@ from abc import ABC as AbstractBaseClass
 
 
 class BillingProcessorContract(AbstractBaseClass):
-
     def subscribe(self, plan, token, customer=None, **kwargs):
         """Subscribe user to a billing plan.
 
@@ -71,7 +70,7 @@ class BillingProcessorContract(AbstractBaseClass):
         pass
 
     def skip_trial(self):
-        """Whether the user should skip the trial and be charged right away. 
+        """Whether the user should skip the trial and be charged right away.
 
         This updates the subscription arguments.
 
@@ -107,7 +106,7 @@ class BillingProcessorContract(AbstractBaseClass):
         """Updates the card on file with the user.
 
         Arguments:
-            customer_id {string} -- The Stripe customer identifier. 
+            customer_id {string} -- The Stripe customer identifier.
             token {string} -- The Stripe token from the form submission.
 
         Returns:

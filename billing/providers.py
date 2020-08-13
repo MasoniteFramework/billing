@@ -8,7 +8,7 @@ class BillingProvider(ServiceProvider):
     wsgi = False
 
     def register(self):
-        self.app.bind('BillingInstallCommand', InstallCommand())
+        self.app.bind("BillingInstallCommand", InstallCommand())
 
     def boot(self):
         pass
