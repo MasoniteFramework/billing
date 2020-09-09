@@ -1,8 +1,8 @@
 from billing.drivers import BillingStripeDriver
 
-class BillingFactory:
 
+class BillingFactory:
     @staticmethod
     def make(driver):
-        if driver == 'stripe':
+        if driver == "stripe":
             return BillingStripeDriver()

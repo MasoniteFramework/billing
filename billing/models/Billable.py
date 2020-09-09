@@ -1,16 +1,17 @@
 """ The Billing Model """
 
 import pendulum
- 
 from billing.factories import BillingFactory
+
 
 from .Subscription import Subscription
 
 try:
     from config import billing
+
     PROCESSOR = BillingFactory.make(billing.DRIVER)
 except ImportError:
-    raise ImportError('No configuration file found')
+    raise ImportError("No configuration file found")
 
 
 class Billable:
@@ -28,20 +29,21 @@ class Billable:
             bool
         """
         if not self.customer_id:
-            self.create_customer('Customer {0}'.format(self.email), token)
+            self.create_customer("Customer {0}".format(self.email), token)
 
         if self.is_subscribed(processor_plan):
             return True
 
-        if hasattr(self, 'customer_id'):
+        if hasattr(self, "customer_id"):
             customer_id = self.customer_id
         else:
             customer_id = None
 
         subscription = self._processor.subscribe(
-            processor_plan, token, customer=customer_id)
-        
-        self.plan_id = subscription['id']
+            processor_plan, token, customer=customer_id
+        )
+
+        self.plan_id = subscription["id"]
         self.save()
 
         # TODO add to subscription model
@@ -94,7 +96,11 @@ class Billable:
             if subscription.trial_ends_at and subscription.trial_ends_at.is_future():
                 return True
 
-        if subscription.plan == plan_id and subscription.trial_ends_at and subscription.trial_ends_at.is_future():
+        if (
+            subscription.plan == plan_id
+            and subscription.trial_ends_at
+            and subscription.trial_ends_at.is_future()
+        ):
             return True
 
         return False
@@ -122,7 +128,8 @@ class Billable:
                 # update the ended at date
                 subscription = self._get_subscription()
                 subscription.ends_at = pendulum.from_timestamp(
-                    cancel['current_period_end'])
+                    cancel["current_period_end"]
+                )
                 subscription.save()
                 return True
         return False
@@ -150,7 +157,7 @@ class Billable:
             string -- Returns the customer id.
         """
         customer = self._processor._create_customer(description, token)
-        self.customer_id = customer['id']
+        self.customer_id = customer["id"]
         self.save()
         return self.customer_id
 
@@ -175,14 +182,14 @@ class Billable:
         Returns:
             processor.charge -- The processor charge method.
         """
-        if not kwargs.get('token'):
-            kwargs.update({'customer': self.customer_id})
+        if not kwargs.get("token"):
+            kwargs.update({"customer": self.customer_id})
         else:
-            kwargs.update({'source': kwargs.get('token')})
-            del kwargs['token']
+            kwargs.update({"source": kwargs.get("token")})
+            del kwargs["token"]
 
-        if not kwargs.get('description'):
-            kwargs.update({'description': 'Charge For {0}'.format(self.email)})
+        if not kwargs.get("description"):
+            kwargs.update({"description": "Charge For {0}".format(self.email)})
 
         return self._processor.charge(amount, **kwargs)
 
@@ -204,7 +211,10 @@ class Billable:
         # If the subscription exists
         if self._get_subscription():
             # If the subscription does not expire OR the subscription ends at a time in the future
-            if not self._get_subscription().ends_at or (self._get_subscription().ends_at and self._get_subscription().ends_at.is_future()):
+            if not self._get_subscription().ends_at or (
+                self._get_subscription().ends_at
+                and self._get_subscription().ends_at.is_future()
+            ):
                 # If the plan name equals the plan name specified
                 if plan_name and self._get_subscription().plan == plan_name:
                     return True
@@ -249,7 +259,11 @@ class Billable:
         if not subscription:
             return False
 
-        if not subscription.trial_ends_at and subscription.ends_at and subscription.ends_at.is_future():
+        if (
+            not subscription.trial_ends_at
+            and subscription.ends_at
+            and subscription.ends_at.is_future()
+        ):
             return True
 
         return False
@@ -261,12 +275,11 @@ class Billable:
             new_plan {string} -- The new plan to swap to.
 
         Returns:
-            bool   
+            bool
         """
         trial_ends_at = None
         ends_at = None
-        swapped_subscription = self._processor.swap(
-            self.plan_id, new_plan, **kwargs)
+        swapped_subscription = self._processor.swap(self.plan_id, new_plan, **kwargs)
 
         # if swapped_subscription['plan']['trial_end']:
         #     trial_ends_at = pendulum.from_timestamp(
@@ -277,8 +290,8 @@ class Billable:
         #         swapped_subscription['current_period_end'])
 
         subscription = self._get_subscription()
-        subscription.plan = swapped_subscription['plan']['id']
-        subscription.plan_name = swapped_subscription['plan']['id']
+        subscription.plan = swapped_subscription["plan"]["id"]
+        subscription.plan_name = swapped_subscription["plan"]["id"]
         subscription.trial_ends_at = trial_ends_at
         subscription.ends_at = ends_at
         return subscription.save()
@@ -328,7 +341,7 @@ class Billable:
         Returns:
             billing.models.Subscription - The billing subscription model.
         """
-        return Subscription.where('user_id', self.id).first()
+        return Subscription.where("user_id", self.id).first()
 
     def _save_subscription_model(self, processor_plan, subscription_object):
         """Saves the plan to the subscription model
@@ -342,21 +355,21 @@ class Billable:
         """
         trial_ends_at = None
         ends_at = None
-        
-        if subscription_object['plan']['trial_period_days']:
+
+        if subscription_object["plan"]["trial_period_days"]:
             trial_ends_at = pendulum.now().add(
-                days=subscription_object['plan']['trial_period_days'])
+                days=subscription_object["plan"]["trial_period_days"]
+            )
 
-        if subscription_object['ended_at']:
-            ends_at = pendulum.from_timestamp(subscription_object['ended_at'])
+        if subscription_object["ended_at"]:
+            ends_at = pendulum.from_timestamp(subscription_object["ended_at"])
 
-        subscription = Subscription.where('user_id', self.id).first()
+        subscription = Subscription.where("user_id", self.id).first()
         # product = self._processor.resubscription_object['plan']['product']
         if subscription:
             subscription.plan = processor_plan
-            subscription.plan_id = subscription_object['id']
-            subscription.plan_name = self._processor.plan(
-                subscription_object['id'])
+            subscription.plan_id = subscription_object["id"]
+            subscription.plan_name = self._processor.plan(subscription_object["id"])
             subscription.trial_ends_at = trial_ends_at
             subscription.ends_at = ends_at
             subscription.save()
@@ -365,8 +378,8 @@ class Billable:
             subscription = Subscription.create(
                 user_id=self.id,
                 plan=processor_plan,
-                plan_id=subscription_object['id'],
-                plan_name=self._processor.plan(subscription_object['id']),
+                plan_id=subscription_object["id"],
+                plan_name=self._processor.plan(subscription_object["id"]),
                 trial_ends_at=trial_ends_at,
                 ends_at=ends_at,
             )

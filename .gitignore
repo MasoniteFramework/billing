@@ -6,3 +6,6 @@ masonite_billing.egg-info
 dist
 .pytest_cache
 **.pyc
+
+# local test
+test.db

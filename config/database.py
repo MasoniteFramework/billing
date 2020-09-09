@@ -28,18 +28,17 @@ load_dotenv(find_dotenv())
 | @see Orator migrations documentation for more info
 |
 '''
-
 DATABASES = {
-    'default': 'mysql',
-    'mysql': {
-        'driver': 'mysql',
-        'host': env('DB_HOST'),
-        'database': env('DB_DATABASE'),
-        'port': env('DB_PORT'),
-        'user': env('DB_USERNAME'),
-        'password': env('DB_PASSWORD'),
-        'log_queries': env('DB_LOG'),
+    'default': os.environ.get('DB_DRIVER'),
+    'sqlite': {
+        'driver': 'sqlite',
+        'database': os.environ.get('DB_DATABASE')
     },
+    os.environ.get('DB_DRIVER'): {
+        'driver': os.environ.get('DB_DRIVER'),
+        'database': os.environ.get('DB_DATABASE'),
+        'prefix': ''
+    }
 }
 
 DB = DatabaseManager(DATABASES)
