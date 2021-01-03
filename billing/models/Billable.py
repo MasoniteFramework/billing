@@ -120,7 +120,7 @@ class Billable:
             if now:
                 # delete it now
                 subscription = self._get_subscription()
-                subscription.ends_at = pendulum.now()
+                subscription.ends_at = pendulum.now().to_datetime_string()
                 subscription.trial_ends_at = None
                 subscription.save()
                 return True
@@ -129,7 +129,7 @@ class Billable:
                 subscription = self._get_subscription()
                 subscription.ends_at = pendulum.from_timestamp(
                     cancel["current_period_end"]
-                )
+                ).to_datetime_string()
                 subscription.save()
                 return True
         return False
