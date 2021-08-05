@@ -1,5 +1,4 @@
-from config.database import Model
-
+from masoniteorm.models import Model
 
 class Subscription(Model):
     __fillable__ = [

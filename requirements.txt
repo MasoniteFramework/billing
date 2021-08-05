@@ -1,6 +1,6 @@
 python-dotenv
-orator
-masonite>=2.2
+masonite-orm
+masonite>=3.0
 stripe
 flake8
 pytest
