@@ -1,11 +1,10 @@
 """ A BillingProvider Service Provider """
-from masonite.provider import ServiceProvider
-from billing.commands.InstallCommand import InstallCommand
+from masonite.providers import Provider
+
+from ..commands.InstallCommand import InstallCommand
 
 
-class BillingProvider(ServiceProvider):
-
-    wsgi = False
+class BillingProvider(Provider):
 
     def register(self):
         self.app.bind("BillingInstallCommand", InstallCommand())
