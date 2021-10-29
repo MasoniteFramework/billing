@@ -1,7 +1,7 @@
 """ The Billing Model """
 
 import pendulum
-from billing.factories import BillingFactory
+from ..factories import BillingFactory
 
 
 from .Subscription import Subscription

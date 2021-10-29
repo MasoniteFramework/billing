@@ -1,6 +1,6 @@
 """ Masonite Billing Controller For Webhooks """
 
-from billing.models import Subscription
+from ..models import Subscription
 from config import auth
 import pendulum
 from masonite.request import Request

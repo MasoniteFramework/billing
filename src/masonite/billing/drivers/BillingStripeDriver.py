@@ -4,7 +4,7 @@ import pendulum
 import stripe
 from stripe.error import InvalidRequestError
 
-from billing.exceptions import PlanNotFound
+from ..exceptions import PlanNotFound
 
 try:
     from config import billing

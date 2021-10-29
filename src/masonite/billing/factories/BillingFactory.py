@@ -1,4 +1,4 @@
-from billing.drivers import BillingStripeDriver
+from ..drivers import BillingStripeDriver
 
 
 class BillingFactory:

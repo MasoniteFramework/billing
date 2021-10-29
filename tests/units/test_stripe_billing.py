@@ -3,8 +3,8 @@ import pytest
 import time
 
 from dotenv import find_dotenv, load_dotenv
-from billing.models import Billable, Subscription
-from billing.exceptions import PlanNotFound
+from ..models import Billable, Subscription
+from ..exceptions import PlanNotFound
 from masonite.app import App
 import pendulum
 
