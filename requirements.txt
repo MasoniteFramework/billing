@@ -1,6 +1,4 @@
-python-dotenv
-orator
-masonite>=2.2
+https://github.com/MasoniteFramework/orm/archive/2.0.zip
 stripe
 flake8
 pytest
