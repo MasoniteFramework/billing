@@ -19,7 +19,9 @@ class BillingStripeDriver:
         if api_key:
             stripe.api_key = api_key
         else:
-            raise InvalidDriverConfiguration("Stripe API key not found. Please provide 'secret' in config/billing.py.")
+            raise InvalidDriverConfiguration(
+                "Stripe API key not found. Please provide 'secret' in config/billing.py."
+            )
         return self
 
     def subscribe(self, plan, token, customer=None, **kwargs):
@@ -142,10 +144,7 @@ class BillingStripeDriver:
         try:
             # get the plan
             subscription = self._get_subscription(plan_id)
-            if (
-                subscription["cancel_at_period_end"] is True
-                and subscription["status"] == "active"
-            ):
+            if subscription["cancel_at_period_end"] is True and subscription["status"] == "active":
                 return True
         except InvalidRequestError:
             return False
@@ -232,7 +231,8 @@ class BillingStripeDriver:
             True
         """
         stripe.Customer.modify(
-            customer_id, source=token,
+            customer_id,
+            source=token,
         )
 
         return True
@@ -251,7 +251,12 @@ class BillingStripeDriver:
         subscription = stripe.Subscription.modify(
             plan,
             cancel_at_period_end=True,
-            items=[{"id": subscription["items"]["data"][0].id, "plan": new_plan, }],
+            items=[
+                {
+                    "id": subscription["items"]["data"][0].id,
+                    "plan": new_plan,
+                }
+            ],
         )
         return subscription
 

@@ -4,9 +4,9 @@ from .Subscription import Subscription
 
 
 class Billable:
-
     def get_driver(self):
         from wsgi import application
+
         return application.make("billing").get_driver()
 
     def subscribe(self, processor_plan, token):
@@ -30,9 +30,7 @@ class Billable:
         else:
             customer_id = None
 
-        subscription = self.get_driver().subscribe(
-            processor_plan, token, customer=customer_id
-        )
+        subscription = self.get_driver().subscribe(processor_plan, token, customer=customer_id)
 
         self.plan_id = subscription["id"]
         self.save()
@@ -185,8 +183,7 @@ class Billable:
         return self.get_driver().charge(amount, **kwargs)
 
     def on_grace_period(self):
-        """Check if a user is on a grace period
-        """
+        """Check if a user is on a grace period"""
         pass
 
     def is_subscribed(self, plan_name=None):
@@ -203,8 +200,7 @@ class Billable:
         if self._get_subscription():
             # If the subscription does not expire OR the subscription ends at a time in the future
             if not self._get_subscription().ends_at or (
-                self._get_subscription().ends_at
-                and self._get_subscription().ends_at.is_future()
+                self._get_subscription().ends_at and self._get_subscription().ends_at.is_future()
             ):
                 # If the plan name equals the plan name specified
                 if plan_name and self._get_subscription().plan == plan_name:

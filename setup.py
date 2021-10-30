@@ -5,14 +5,15 @@ with open("README.md", "r") as fh:
 
 setup(
     name="masonite-billing",
-    version='4.0.0',
+    version="4.0.0",
     packages=[
-        'masonite.billing',
-        'masonite.billing.commands',
-        'masonite.billing.controllers',
-        'masonite.billing.drivers',
-        'masonite.billing.factories',
-        'masonite.billing.models',
+        "masonite.billing",
+        "masonite.billing.commands",
+        "masonite.billing.config",
+        "masonite.billing.controllers",
+        "masonite.billing.drivers",
+        "masonite.billing.models",
+        "masonite.billing.providers",
     ],
     package_dir={"": "src"},
     description="Masonite billing management",
@@ -24,9 +25,9 @@ setup(
     author="Joe Mancuso",
     author_email="joe@masoniteproject.com",
     install_requires=[
-        'masonite>=4.0<5.0',
-        'cleo',
-        'stripe==2.40.0',
+        "masonite>=4.0<5.0",
+        "cleo",
+        "stripe==2.40.0",
     ],
     license="MIT",
     keywords="Masonite, Python, Stripe",
@@ -50,6 +51,6 @@ setup(
             "black",
             "flake8",
             "twine>=1.5.0",
-        ]
+        ],
     },
 )

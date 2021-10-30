@@ -6,7 +6,6 @@ from ..drivers import BillingStripeDriver
 
 
 class BillingProvider(Provider):
-
     def __init__(self, application):
         self.application = application
 
@@ -16,9 +15,7 @@ class BillingProvider(Provider):
         billing.add_driver("stripe", BillingStripeDriver(self.application))
         self.application.bind("billing", billing)
 
-        self.application.make('commands').add(
-            InstallCommand()
-        )
+        self.application.make("commands").add(InstallCommand())
 
     def boot(self):
         pass

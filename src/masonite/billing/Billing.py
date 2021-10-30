@@ -2,7 +2,6 @@ from masonite.configuration import config
 
 
 class Billing:
-
     def __init__(self, application):
         self.application = application
         self.drivers = {}
