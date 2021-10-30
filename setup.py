@@ -15,7 +15,7 @@ setup(
         'masonite.billing.models',
     ],
     package_dir={"": "src"},
-    description="The Masonite Framework",
+    description="Masonite billing management",
     long_description=long_description,
     long_description_content_type="text/markdown",
     # The project's main homepage.
@@ -29,6 +29,7 @@ setup(
         'stripe==2.40.0',
     ],
     license="MIT",
+    keywords="Masonite, Python, Stripe",
     # If your package should include things you specify in your MANIFEST.in file
     # Use this option if your package needs to include files that are not python files
     # like html templates or css files
@@ -42,6 +43,13 @@ setup(
         "test": [
             "coverage",
             "pytest",
+            "pytest-cov",
+            "coveralls",
         ],
+        "dev": [
+            "black",
+            "flake8",
+            "twine>=1.5.0",
+        ]
     },
 )
