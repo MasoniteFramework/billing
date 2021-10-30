@@ -87,8 +87,8 @@ class BillingStripeDriver:
         """Checks if the user in on a trial
 
         Keyword Arguments:
-            plan_id {string|None} -- If the argument is None it will look up the users current plan. Else
-                                        it will find out if the user is subscribed to the plan given. (default: {None})
+            plan_id {string|None} -- If None it will look up the users current plan. Else it will
+            find out if the user is subscribed to the plan given. (default: {None})
 
         Returns:
             bool
@@ -112,7 +112,8 @@ class BillingStripeDriver:
             plan_id {string} -- The plan identifier to check for
 
         Keyword Arguments:
-            plan_name {string|None} -- The plan name the user should be subscribed to. (default: {None})
+            plan_name {string|None} -- The plan name the user should be subscribed to.
+                (default: {None})
 
         Returns:
             bool
@@ -158,7 +159,8 @@ class BillingStripeDriver:
             plan_id {string} -- The Stripe plan identifier.
 
         Keyword Arguments:
-            now {bool} -- Whether the user should be canceled now or at the end of the billing period. (default: {False})
+            now {bool} -- Whether the user should be canceled now or at the end of the billing
+            period. (default: {False})
 
         Returns:
             False|stripe.subscription.retrieve

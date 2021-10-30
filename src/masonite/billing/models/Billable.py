@@ -98,7 +98,8 @@ class Billable:
         """Cancel a subscription.
 
         Keyword Arguments:
-            now {bool} -- Whether the user should be cancelled now or when the pay period ends. (default: {False})
+            now {bool} -- Whether the user should be cancelled now or when the pay period ends.
+            (default: {False})
 
         Returns:
             bool -- Whether or not the user has been successfully cancelled.
@@ -190,8 +191,9 @@ class Billable:
         """Check if a user is subscribed.
 
         Keyword Arguments:
-            plan_name {string} -- The plan name or None. If it is None this will check if the user is subscribed.
-                                    If a string exists it will check if a user is subscribed to that plan. (default: {None})
+            plan_name {string} -- The plan name or None. If it is None this will check if the user
+            is subscribed. If a string exists it will check if a user is subscribed to that plan.
+            (default: {None})
 
         Returns:
             bool -- Whether the user is subscribed or not.
@@ -216,8 +218,9 @@ class Billable:
         """Checks if the user was subscribed at one point but is no longer
 
         Keyword Arguments:
-            plan {string|None} -- The plan name or None. If it is None this will check if the user is subscribed.
-                                    If a string exists it will check if a user is subscribed to that plan. (default: {None})
+            plan {string|None} -- The plan name or None. If it is None this will check if the user
+            is subscribed. If a string exists it will check if a user is subscribed to that
+            plan. (default: {None})
 
         Returns:
             bool -- Whether the user was subscribed at one point but is not currently subscribed.
@@ -233,7 +236,8 @@ class Billable:
         return False
 
     def is_canceled(self):
-        """Check if the user was subscribed but cancelled their subscription. This is useful if the user is on a grace period.
+        """Check if the user was subscribed but cancelled their subscription. This is useful if
+        the user is on a grace period.
 
         Returns:
             bool

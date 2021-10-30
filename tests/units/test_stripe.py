@@ -51,88 +51,88 @@ class TestStripe(TestCase):
     def test_is_subscribed(self):
         self.user.subscribe("masonite-test", "tok_amex")
 
-        assert self.user.is_subscribed() is True
-        assert self.user.is_subscribed("masonite-test") is True
-        assert self.user.is_canceled() is False
+        assert self.user.is_subscribed()
+        assert self.user.is_subscribed("masonite-test")
+        assert not self.user.is_canceled()
         assert self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         #     time.sleep(2)
 
-        assert self.user.is_subscribed("masonite-test") is False
-        assert self.user.is_subscribed() is False
+        assert not self.user.is_subscribed("masonite-test")
+        assert not self.user.is_subscribed()
 
         wrong_token_user = User()
         wrong_token_user.plan_id = "incorrect_token"
-        assert wrong_token_user.is_subscribed() is False
+        assert not wrong_token_user.is_subscribed()
 
     def test_cancel_billing(self):
         self.user.subscribe("masonite-flash", "tok_amex")
 
-        assert self.user.is_subscribed("masonite-flash") is True
-        assert self.user.cancel(now=True) is True
+        assert self.user.is_subscribed("masonite-flash")
+        assert self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         #     time.sleep(2)
 
-        assert self.user.is_subscribed("masonite-flash") is False
-        assert self.user.is_subscribed() is False
+        assert not self.user.is_subscribed("masonite-flash")
+        assert not self.user.is_subscribed()
 
     def test_on_trial(self):
         self.user.subscribe("masonite-flash", "tok_amex")
-        assert self.user.on_trial() is False
-        assert self.user.cancel(now=True) is True
+        assert not self.user.on_trial()
+        assert self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         #     time.sleep(2)
 
         self.user.trial(days=7).subscribe("masonite-flash", "tok_amex")
-        assert self.user.on_trial() is True
-        assert self.user.cancel(now=False) is True
-        assert self.user.on_trial() is True
-        assert self.user.cancel(now=True) is True
+        assert self.user.on_trial()
+        assert self.user.cancel(now=False)
+        assert self.user.on_trial()
+        assert self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         #     time.sleep(2)
 
-        assert self.user.on_trial() is False
+        assert not self.user.on_trial()
 
     def test_subscribe_cancel_subscription_at_end_of_period(self):
         self.user.subscribe("masonite-flash", "tok_amex")
 
-        assert self.user.is_subscribed() is True
+        assert self.user.is_subscribed()
         self.user.cancel(now=False)
-        assert self.user.is_subscribed() is True
+        assert self.user.is_subscribed()
         self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         #     time.sleep(2)
 
-        assert self.user.is_subscribed() is False
+        assert not self.user.is_subscribed()
 
     def test_subscription_is_canceled(self):
         self.user.subscribe("masonite-flash", "tok_amex")
 
-        assert self.user.is_canceled() == False
+        assert not self.user.is_canceled()
         self.user.cancel(now=False)
-        assert self.user.is_canceled() == True
+        assert self.user.is_canceled()
 
         self.user.cancel(now=True)
-        assert self.user.is_canceled() == False
+        assert not self.user.is_canceled()
 
     def test_skip_trial(self):
         self.user.subscribe("masonite-test", "tok_amex")
 
-        assert self.user.on_trial() is True
+        assert self.user.on_trial()
         self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         #     time.sleep(2)
 
         self.user.skip_trial().subscribe("masonite-test", "tok_amex")
 
-        assert self.user.on_trial() is False
+        assert not self.user.on_trial()
         self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         #     time.sleep(2)
 
     def test_charge_customer(self):
         self.user.email = "test@email.com"
-        assert self.user.charge(999) is True
+        assert self.user.charge(999)
         assert self.user.charge(999, token="tok_amex")
         assert self.user.charge(299, metadata={"name": "test"})
         assert self.user.charge(299, description="Charge For test@email.com")
@@ -141,26 +141,26 @@ class TestStripe(TestCase):
         self.user.subscribe("masonite-test", "tok_amex")
 
         assert self.user.is_subscribed("masonite-test")
-        assert self.user.swap("masonite-flash") is True
-        assert self.user.is_subscribed() is True
-        assert self.user.is_subscribed("masonite-flash") is True
-        assert self.user.is_subscribed("masonite-test") is False
+        assert self.user.swap("masonite-flash")
+        assert self.user.is_subscribed()
+        assert self.user.is_subscribed("masonite-flash")
+        assert not self.user.is_subscribed("masonite-test")
 
         assert self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
         #     time.sleep(2)
 
     def test_change_card(self):
-        assert self.user.card("tok_amex") is True
+        assert self.user.card("tok_amex")
 
     def test_cancel_and_resume_plan(self):
         self.user.skip_trial().subscribe("masonite-test", "tok_amex")
 
         # assert user.is_canceled() is False
-        assert self.user.cancel() is True
-        assert self.user.is_canceled() is True
+        assert self.user.cancel()
+        assert self.user.is_canceled()
         assert self.user.resume()
-        assert self.user.is_canceled() is False
+        assert not self.user.is_canceled()
 
         self.user.cancel(now=True)
         if os.environ.get("TEST_ENVIRONMENT") == "travis":
@@ -184,8 +184,8 @@ class TestStripe(TestCase):
         subscription.trial_ends_at = pendulum.now().subtract(days=1)
         subscription.save()
 
-        assert self.user.on_trial() is False
-        assert self.user.on_trial() is False
+        assert not self.user.on_trial()
+        assert not self.user.on_trial()
 
         self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
@@ -193,21 +193,21 @@ class TestStripe(TestCase):
 
     def test_subscription_is_over(self):
         self.user.skip_trial().subscribe("masonite-test", "tok_amex")
-        assert self.user.is_subscribed() is True
-        assert self.user.on_trial() is False
+        assert self.user.is_subscribed()
+        assert not self.user.on_trial()
 
         # set the subscription to an expired time
         subscription = self.user._get_subscription()
         subscription.ends_at = pendulum.now().subtract(minutes=1)
         subscription.save()
 
-        assert self.user.on_trial() is False
+        assert not self.user.on_trial()
 
-        assert self.user.was_subscribed() is True
-        assert self.user.was_subscribed("masonite-test") is True
-        assert self.user.was_subscribed("masonite-flash") is False
+        assert self.user.was_subscribed()
+        assert self.user.was_subscribed("masonite-test")
+        assert not self.user.was_subscribed("masonite-flash")
 
-        assert self.user.is_subscribed() is False
+        assert not self.user.is_subscribed()
 
         self.user.cancel(now=True)
         # if os.environ.get('TEST_ENVIRONMENT') == 'travis':
@@ -223,8 +223,8 @@ class TestStripe(TestCase):
 
     def test_can_use_coupon_on_subscription(self):
         self.user.skip_trial().coupon("5-off").subscribe("masonite-test", "tok_amex")
-        assert self.user.is_subscribed() is True
-        assert self.user.on_trial() is False
-        subscription = self.user._get_subscription()
+        assert self.user.is_subscribed()
+        assert not self.user.on_trial()
+        self.user._get_subscription()
 
         self.user.cancel(now=True)
