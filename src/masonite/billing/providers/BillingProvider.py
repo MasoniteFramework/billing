@@ -6,8 +6,13 @@ from ..commands.InstallCommand import InstallCommand
 
 class BillingProvider(Provider):
 
+    def __init__(self, application):
+        self.application = application
+
     def register(self):
-        self.app.bind("BillingInstallCommand", InstallCommand())
+        self.application.make('commands').add(
+            InstallCommand()
+        )
 
     def boot(self):
         pass
