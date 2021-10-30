@@ -1,11 +1,10 @@
 """ Masonite Billing Controller For Webhooks """
 
-from ..models import Subscription
-from config import auth
 import pendulum
 from masonite.request import Request
-from masonite.helpers import config
-from config.auth import AUTH
+from masonite.configuration import config
+
+from ..models import Subscription
 
 
 class WebhookController:
@@ -13,7 +12,7 @@ class WebhookController:
     Add webhooks to tie into stripe events
     """
 
-    model = AUTH["guards"]["web"]["model"]
+    model = config("auth.guards.web.model")
 
     def handle(self, request: Request):
         """
