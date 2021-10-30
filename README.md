@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://banners.beyondco.de/Masonite%20Billing.png?theme=light&packageManager=pip+install&packageName=masonite-billing&pattern=topography&style=style_1&description=Masonite%billing%20management&md=1&showWatermark=1&fontSize=100px&images=https%3A%2F%2Fgblobscdn.gitbook.com%2Fspaces%2F-L9uc-9XAlqhXkBwrLMA%2Favatar.png">
+    <img src="https://banners.beyondco.de/Masonite%20Billing.png?theme=light&packageManager=pip+install&packageName=masonite-billing&pattern=topography&style=style_1&description=Masonite%20billing%20management&md=1&showWatermark=1&fontSize=100px&images=https%3A%2F%2Fgblobscdn.gitbook.com%2Fspaces%2F-L9uc-9XAlqhXkBwrLMA%2Favatar.png">
 </p>
 
 <p align="center">
