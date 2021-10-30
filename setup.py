@@ -9,7 +9,6 @@ setup(
     packages=[
         'masonite.billing',
         'masonite.billing.commands',
-        'masonite.billing.contracts',
         'masonite.billing.controllers',
         'masonite.billing.drivers',
         'masonite.billing.factories',
@@ -25,7 +24,7 @@ setup(
     author="Joe Mancuso",
     author_email="joe@masoniteproject.com",
     install_requires=[
-        'masonite>=2.2',
+        'masonite>=4.0<5.0',
         'cleo',
         'stripe==2.40.0',
     ],
@@ -34,4 +33,15 @@ setup(
     # Use this option if your package needs to include files that are not python files
     # like html templates or css files
     include_package_data=True,
+    # List additional groups of dependencies here (e.g. development
+    # dependencies). You can install these using the following syntax,
+    # for example:
+    # $ pip install -e .[dev,test]
+    # $ pip install your-package[dev,test]
+    extras_require={
+        "test": [
+            "coverage",
+            "pytest",
+        ],
+    },
 )

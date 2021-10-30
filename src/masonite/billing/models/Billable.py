@@ -1,22 +1,13 @@
-""" The Billing Model """
-
 import pendulum
-from ..factories import BillingFactory
-
 
 from .Subscription import Subscription
-
-try:
-    from config import billing
-
-    PROCESSOR = BillingFactory.make(billing.DRIVER)
-except ImportError:
-    raise ImportError("No configuration file found")
 
 
 class Billable:
 
-    _processor = PROCESSOR
+    def get_driver(self):
+        from wsgi import application
+        return application.make("billing").get_driver()
 
     def subscribe(self, processor_plan, token):
         """Subscribe user to a billing plan.
@@ -39,7 +30,7 @@ class Billable:
         else:
             customer_id = None
 
-        subscription = self._processor.subscribe(
+        subscription = self.get_driver().subscribe(
             processor_plan, token, customer=customer_id
         )
 
@@ -63,7 +54,7 @@ class Billable:
         Returns:
             self
         """
-        self._processor.coupon(coupon_id)
+        self.get_driver().coupon(coupon_id)
         return self
 
     def trial(self, days=False):
@@ -75,7 +66,7 @@ class Billable:
         Returns:
             self
         """
-        self._processor.trial(days)
+        self.get_driver().trial(days)
         return self
 
     def on_trial(self, plan_id=None):
@@ -114,7 +105,7 @@ class Billable:
         Returns:
             bool -- Whether or not the user has been successfully cancelled.
         """
-        cancel = self._processor.cancel(self.plan_id, now=now)
+        cancel = self.get_driver().cancel(self.plan_id, now=now)
 
         if cancel:
             if now:
@@ -156,7 +147,7 @@ class Billable:
         Returns:
             string -- Returns the customer id.
         """
-        customer = self._processor._create_customer(description, token)
+        customer = self.get_driver()._create_customer(description, token)
         self.customer_id = customer["id"]
         self.save()
         return self.customer_id
@@ -191,7 +182,7 @@ class Billable:
         if not kwargs.get("description"):
             kwargs.update({"description": "Charge For {0}".format(self.email)})
 
-        return self._processor.charge(amount, **kwargs)
+        return self.get_driver().charge(amount, **kwargs)
 
     def on_grace_period(self):
         """Check if a user is on a grace period
@@ -279,7 +270,7 @@ class Billable:
         """
         trial_ends_at = None
         ends_at = None
-        swapped_subscription = self._processor.swap(self.plan_id, new_plan, **kwargs)
+        swapped_subscription = self.get_driver().swap(self.plan_id, new_plan, **kwargs)
 
         # if swapped_subscription['plan']['trial_end']:
         #     trial_ends_at = pendulum.from_timestamp(
@@ -302,7 +293,7 @@ class Billable:
         Returns:
             self
         """
-        self._processor.skip_trial()
+        self.get_driver().skip_trial()
         return self
 
     def prorate(self, bool):
@@ -318,7 +309,7 @@ class Billable:
         Returns:
             processor.resume -- Returns the processor resume method.
         """
-        plan = self._processor.resume(self.plan_id)
+        plan = self.get_driver().resume(self.plan_id)
         subscription = self._get_subscription()
         subscription.ends_at = None
         subscription.save()
@@ -333,7 +324,7 @@ class Billable:
         Returns:
             processor.card -- Returns the processor card method.
         """
-        return self._processor.card(self.customer_id, token)
+        return self.get_driver().card(self.customer_id, token)
 
     def _get_subscription(self):
         """Gets the subscription from the subcriptions table.
@@ -365,11 +356,11 @@ class Billable:
             ends_at = pendulum.from_timestamp(subscription_object["ended_at"])
 
         subscription = Subscription.where("user_id", self.id).first()
-        # product = self._processor.resubscription_object['plan']['product']
+        # product = self.get_driver().resubscription_object['plan']['product']
         if subscription:
             subscription.plan = processor_plan
             subscription.plan_id = subscription_object["id"]
-            subscription.plan_name = self._processor.plan(subscription_object["id"])
+            subscription.plan_name = self.get_driver().plan(subscription_object["id"])
             subscription.trial_ends_at = trial_ends_at
             subscription.ends_at = ends_at
             subscription.save()
@@ -379,7 +370,7 @@ class Billable:
                 user_id=self.id,
                 plan=processor_plan,
                 plan_id=subscription_object["id"],
-                plan_name=self._processor.plan(subscription_object["id"]),
+                plan_name=self.get_driver().plan(subscription_object["id"]),
                 trial_ends_at=trial_ends_at,
                 ends_at=ends_at,
             )

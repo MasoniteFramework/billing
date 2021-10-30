@@ -1,22 +1,26 @@
-""" The Stripe Billing Driver """
-
-import pendulum
 import stripe
 from stripe.error import InvalidRequestError
 
-from ..exceptions import PlanNotFound
-
-try:
-    from config import billing
-
-    stripe.api_key = billing.DRIVERS["stripe"]["secret"]
-except ImportError:
-    raise ImportError("Billing configuration found")
+from ..exceptions import PlanNotFound, InvalidDriverConfiguration
 
 
 class BillingStripeDriver:
+    """Stripe billing driver"""
 
     _subscription_args = {}
+
+    def __init__(self, application):
+        self.application = application
+        self.options = {}
+
+    def set_options(self, options):
+        self.options = options
+        api_key = self.options.get("secret")
+        if api_key:
+            stripe.api_key = api_key
+        else:
+            raise InvalidDriverConfiguration("Stripe API key not found. Please provide 'secret' in config/billing.py.")
+        return self
 
     def subscribe(self, plan, token, customer=None, **kwargs):
         """Subscribe user to a billing plan.
@@ -206,7 +210,7 @@ class BillingStripeDriver:
             bool -- Whether the charge succeeded.
         """
         if not kwargs.get("currency"):
-            kwargs.update({"currency": billing.DRIVERS["stripe"]["currency"]})
+            kwargs.update({"currency": self.options.get("currency")})
 
         amount = self._apply_coupon(amount)
 
