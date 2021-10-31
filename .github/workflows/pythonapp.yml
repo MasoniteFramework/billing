@@ -19,6 +19,9 @@ jobs:
         run: |
           make init
       - name: Test with pytest
+        env:
+          STRIPE_SECRET: ${{ github.secrets.STRIPE_SECRET }}
+          STRIPE_CLIENT: ${{ github.secrets.STRIPE_CLIENT }}
         run: |
           make test
   lint:
