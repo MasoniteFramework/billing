@@ -3,11 +3,12 @@
 import pendulum
 from masonite.request import Request
 from masonite.configuration import config
+from masonite.controllers import Controller
 
 from ..models import Subscription
 
 
-class WebhookController:
+class WebhookController(Controller):
     """
     Add webhooks to tie into stripe events
     """
