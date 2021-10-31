@@ -34,7 +34,7 @@ setup(
     # If your package should include things you specify in your MANIFEST.in file
     # Use this option if your package needs to include files that are not python files
     # like html templates or css files
-    include_package_data=True,
+    include_package_data=True, 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
