@@ -5,6 +5,7 @@ import pendulum
 import os
 from masonite.tests import TestCase
 from masonite.environment import env
+from masonite.configuration import config
 
 from src.masonite.billing import Billable
 from src.masonite.billing.exceptions import PlanNotFound
@@ -27,6 +28,7 @@ class TestStripe(TestCase):
         print("*****")
         print(env("STRIPE_SECRET"))
         print(os.getenv("STRIPE_SECRET"))
+        print(config("billing"))
         if env("STRIPE_CUSTOMER"):
             cls.user.customer_id = env("STRIPE_CUSTOMER")
         else:
