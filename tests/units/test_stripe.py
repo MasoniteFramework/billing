@@ -2,6 +2,7 @@ import os
 import time
 import pendulum
 
+import os
 from masonite.tests import TestCase
 from masonite.environment import env
 
@@ -23,7 +24,9 @@ class TestStripe(TestCase):
         "Hook method for setting up class fixture before running tests in the class."
         cls.user = User()
         cls.user.email = "test@email.com"
-
+        print("*****")
+        print(env("STRIPE_SECRET"))
+        print(os.getenv("STRIPE_SECRET"))
         if env("STRIPE_CUSTOMER"):
             cls.user.customer_id = env("STRIPE_CUSTOMER")
         else:
