@@ -1,11 +1,10 @@
-import os
-
+from masonite.environment import env
 
 DRIVERS = {
     "default": "stripe",
     "stripe": {
-        "client": os.getenv("STRIPE_CLIENT"),
-        "secret": os.getenv("STRIPE_SECRET"),
+        "client": env("STRIPE_CLIENT"),
+        "secret": env("STRIPE_SECRET"),
         "currency": "usd",
     },
 }

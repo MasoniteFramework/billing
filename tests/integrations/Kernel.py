@@ -43,11 +43,6 @@ class Kernel:
     def register_configurations(self):
         # load configuration
         self.application.bind("config.location", "tests/integrations/config")
-        import os
-
-        print("before loading config")
-        print(os.getenv("UNKNOWN_KEY"))
-        print(os.getenv("STRIPE_SECRET"))
         configuration = Configuration(self.application)
         configuration.load()
         self.application.bind("config", configuration)
