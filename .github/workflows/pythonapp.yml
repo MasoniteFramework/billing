@@ -18,6 +18,9 @@ jobs:
       - name: Install dependencies
         run: |
           make init
+      - name: Apply migrations
+        run: |
+          masonite-orm migrate -C tests/integrations/config/database -d tests/integrations/databases/migrations
       - name: Test with pytest
         env:
           STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
