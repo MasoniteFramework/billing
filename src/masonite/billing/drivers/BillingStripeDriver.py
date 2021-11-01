@@ -20,7 +20,7 @@ class BillingStripeDriver:
             stripe.api_key = api_key
         else:
             raise InvalidDriverConfiguration(
-                "Stripe API key not found. Please provide 'secret' in config/billing.py."
+                "Stripe API key not found. Please provide 'secret' in billing configuration file."
             )
         return self
 
