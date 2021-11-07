@@ -348,8 +348,11 @@ class Billable:
         ends_at = None
 
         if subscription_object["plan"]["trial_period_days"]:
-            trial_ends_at = pendulum.now().add(
-                days=subscription_object["plan"]["trial_period_days"]
+            # TODO: when ORM issue is fixed, remove get_datetime_string()
+            trial_ends_at = (
+                pendulum.now()
+                .add(days=subscription_object["plan"]["trial_period_days"])
+                .get_datetime_string()
             )
 
         if subscription_object["ended_at"]:
