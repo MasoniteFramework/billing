@@ -180,7 +180,8 @@ class TestStripe(TestCase):
 
         # set the trial to an expired time
         subscription = self.user._get_subscription()
-        subscription.trial_ends_at = pendulum.now().subtract(days=1)
+        # TODO: when ORM issue is fixed, remove to_datetime_string()
+        subscription.trial_ends_at = pendulum.now().subtract(days=1).to_datetime_string()
         subscription.save()
 
         assert not self.user.on_trial()
