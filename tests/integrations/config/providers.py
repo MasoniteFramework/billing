@@ -13,6 +13,7 @@ from masonite.providers import (
     HelpersProvider,
     BroadcastProvider,
     AuthenticationProvider,
+    AuthorizationProvider,
     HashServiceProvider,
 )
 
@@ -41,6 +42,7 @@ PROVIDERS = [
     BroadcastProvider,
     HashServiceProvider,
     AuthenticationProvider,
+    AuthorizationProvider,
     ValidationProvider,
     ORMProvider,
     BillingProvider,
